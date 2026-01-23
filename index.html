@@ -2,31 +2,50 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <title>SL TV Player</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: black; }
-        iframe { border: none; width: 100%; height: 100%; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+        #player { width: 100%; height: 100%; }
     </style>
 </head>
 <body>
     <div id="player"></div>
 
     <script>
-    function loadVideo() {
-        // Sucht in der aktuellen Browser-Zeile nach ?v=
+        // 1. Die Video-ID aus der URL holen (z.B. ?v=ID)
         const urlParams = new URLSearchParams(window.location.search);
-        let vID = urlParams.get('v');
+        const videoId = urlParams.get('v');
 
-        if (vID) {
-            document.getElementById('player').innerHTML = 
-                '<iframe src="https://www.youtube-nocookie.com' + vID + 
-                '?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+        if (videoId) {
+            // 2. YouTube IFrame API laden
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            var player;
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: videoId,
+                    playerVars: {
+                        'autoplay': 1,
+                        'rel': 0,
+                        'showinfo': 0,
+                        'modestbranding': 1
+                    },
+                    events: {
+                        'onReady': onPlayerReady
+                    }
+                });
+            }
+            function onPlayerReady(event) {
+                event.target.playVideo();
+            }
         } else {
-            // Falls nichts gefunden wurde, zeigen wir die URL zur Fehlersuche an
-            document.body.innerHTML = '<h1 style="color:white;text-align:center;">Keine ID gefunden.<br><small style="font-size:12px;">Erhaltene URL: ' + window.location.href + '</small></h1>';
+            document.body.innerHTML = '<h2 style="color:white; text-align:center; padding-top:20%;">Warte auf Video-ID von Second Life...</h2>';
         }
-    }
-    window.onload = loadVideo;
-</script>
-
+    </script>
 </body>
 </html>
