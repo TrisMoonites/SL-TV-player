@@ -11,35 +11,45 @@
 </head>
 <body>
     <div id="player"></div>
+    
+    <!-- KORREKTER LINK ZUR API -->
     <script src="https://www.youtube.com"></script>
+    
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
 
         var player;
+        // Diese Funktion wird automatisch von der YouTube-API aufgerufen
         function onYouTubeIframeAPIReady() {
-            if (vID) {
+            if (vID && vID.length >= 10) {
                 player = new YT.Player('player', {
                     videoId: vID,
                     playerVars: {
                         'autoplay': 1,
-                        'mute': 1,       // WICHTIG für Autoplay in 2026
+                        'mute': 1,       // Zwingend für Autoplay 2026
                         'rel': 0,
                         'modestbranding': 1,
-                        'playsinline': 1
+                        'playsinline': 1,
+                        'enablejsapi': 1
                     },
                     events: {
-                        'onReady': onPlayerReady
+                        'onReady': onPlayerReady,
+                        'onError': onPlayerError
                     }
                 });
             } else {
-                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Warte auf Video-ID...</h2>';
+                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Warte auf Video-ID von Second Life...</h2>';
             }
         }
 
         function onPlayerReady(event) {
             event.target.playVideo();
-            // Hinweis: Der User muss in SL auf den Bildschirm klicken, um den Ton zu aktivieren (Unmute)
+        }
+
+        function onPlayerError(e) {
+            // Falls das Video nicht eingebettet werden darf (Urheberrecht)
+            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Video blockiert oder nicht verfügbar.</h2>';
         }
     </script>
 </body>
