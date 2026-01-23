@@ -1,77 +1,46 @@
-// KONFIGURATION
-string GITHUB_URL = "https://trismoonites.github.io";
-key MEDIA_TEXTURE = "8b570628-bc47-4740-8011-f9bd30e87c9f"; // Standard Media Textur
-integer MENU_CHANNEL = -123456;
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SL YouTube Player 2026</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+        #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="player"></div>
+    <script src="https://www.youtube.com"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const vID = urlParams.get('v');
 
-// VARIABLEN
-list gPlaylist = [];
-string gNotecardName = "playlist";
-integer gLine;
-key gQueryID;
-integer gListenHandle;
-
-// YouTube ID aus verschiedenen Link-Formaten extrahieren
-string extractID(string url) {
-    url = llStringTrim(url, STRING_TRIM);
-    if(llSubStringIndex(url, "v=") != -1) {
-        return llGetSubString(url, llSubStringIndex(url, "v=") + 2, llSubStringIndex(url, "v=") + 12);
-    } else if(llSubStringIndex(url, "youtu.be/") != -1) {
-        return llGetSubString(url, llSubStringIndex(url, "youtu.be/") + 9, llSubStringIndex(url, "youtu.be/") + 19);
-    }
-    return "";
-}
-
-playMedia(string videoURL) {
-    string videoID = extractID(videoURL);
-    if(videoID != "") {
-        string finalURL = GITHUB_URL + videoID;
-        llOwnerSay("Lade Video: " + finalURL);
-        
-        llParcelMediaCommandList([
-            PARCEL_MEDIA_COMMAND_URL, finalURL,
-            PARCEL_MEDIA_COMMAND_TEXTURE, MEDIA_TEXTURE,
-            PARCEL_MEDIA_COMMAND_TYPE, "text/html",
-            PARCEL_MEDIA_COMMAND_PLAY
-        ]);
-    } else {
-        llOwnerSay("Fehler: Ungültiger YouTube-Link.");
-    }
-}
-
-default {
-    state_entry() {
-        gListenHandle = llListen(MENU_CHANNEL, "", NULL_KEY, "");
-        llOwnerSay("System gestartet. Initialisiere Playlist...");
-        
-        if(llGetInventoryType(gNotecardName) == INVENTORY_NOTECARD) {
-            gPlaylist = [];
-            gQueryID = llGetNotecardLine(gNotecardName, gLine = 0);
-        }
-    }
-
-    dataserver(key query_id, string data) {
-        if(query_id == gQueryID) {
-            if(data != EOF) {
-                if(llStringLength(llStringTrim(data, STRING_TRIM)) > 5)
-                    gPlaylist += [data];
-                gQueryID = llGetNotecardLine(gNotecardName, ++gLine);
+        var player;
+        function onYouTubeIframeAPIReady() {
+            if (vID) {
+                player = new YT.Player('player', {
+                    videoId: vID,
+                    playerVars: {
+                        'autoplay': 1,
+                        'mute': 1,       // WICHTIG für Autoplay in 2026
+                        'rel': 0,
+                        'modestbranding': 1,
+                        'playsinline': 1
+                    },
+                    events: {
+                        'onReady': onPlayerReady
+                    }
+                });
             } else {
-                llOwnerSay("Playlist geladen: " + (string)llGetListLength(gPlaylist) + " Songs.");
+                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Warte auf Video-ID...</h2>';
             }
         }
-    }
 
-    touch_start(integer total_number) {
-        llTextBox(llDetectedKey(0), "YouTube-URL hier einfügen:", MENU_CHANNEL);
-    }
-
-    listen(integer channel, string name, key id, string message) {
-        if(channel == MENU_CHANNEL) {
-            playMedia(message);
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            // Hinweis: Der User muss in SL auf den Bildschirm klicken, um den Ton zu aktivieren (Unmute)
         }
-    }
-
-    changed(integer change) {
-        if (change & CHANGED_INVENTORY) llResetScript();
-    }
-}
+    </script>
+</body>
+</html>
