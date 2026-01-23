@@ -1,35 +1,77 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        /* Das macht das Video bildschirmfüllend */
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
-</head>
-<body>
-    <div id="video-container"></div>
+// KONFIGURATION
+string GITHUB_URL = "https://trismoonites.github.io";
+key MEDIA_TEXTURE = "8b570628-bc47-4740-8011-f9bd30e87c9f"; // Standard Media Textur
+integer MENU_CHANNEL = -123456;
 
-    <script>
-        // 1. Hole die Video-ID aus dem Link (?v=...)
-        const urlParams = new URLSearchParams(window.location.search);
-        const videoId = urlParams.get('v');
+// VARIABLEN
+list gPlaylist = [];
+string gNotecardName = "playlist";
+integer gLine;
+key gQueryID;
+integer gListenHandle;
 
-        const container = document.getElementById('video-container');
+// YouTube ID aus verschiedenen Link-Formaten extrahieren
+string extractID(string url) {
+    url = llStringTrim(url, STRING_TRIM);
+    if(llSubStringIndex(url, "v=") != -1) {
+        return llGetSubString(url, llSubStringIndex(url, "v=") + 2, llSubStringIndex(url, "v=") + 12);
+    } else if(llSubStringIndex(url, "youtu.be/") != -1) {
+        return llGetSubString(url, llSubStringIndex(url, "youtu.be/") + 9, llSubStringIndex(url, "youtu.be/") + 19);
+    }
+    return "";
+}
 
-        if (videoId) {
-            // 2. Erstelle den Player direkt als IFrame
-            // Wir nutzen 'youtube-nocookie.com', das wird seltener blockiert
-            container.innerHTML = `
-                <iframe 
-                    src="https://www.youtube-nocookie.com{videoId}?autoplay=1&mute=1&rel=0" 
-                    allow="autoplay; encrypted-media" 
-                    allowfullscreen>
-                </iframe>`;
-        } else {
-            // Falls keine ID da ist, zeige diesen Text
-            container.innerHTML = '<h2 style="color:white; text-align:center; padding-top:20%;">Warte auf Video...</h2>';
+playMedia(string videoURL) {
+    string videoID = extractID(videoURL);
+    if(videoID != "") {
+        string finalURL = GITHUB_URL + videoID;
+        llOwnerSay("Lade Video: " + finalURL);
+        
+        llParcelMediaCommandList([
+            PARCEL_MEDIA_COMMAND_URL, finalURL,
+            PARCEL_MEDIA_COMMAND_TEXTURE, MEDIA_TEXTURE,
+            PARCEL_MEDIA_COMMAND_TYPE, "text/html",
+            PARCEL_MEDIA_COMMAND_PLAY
+        ]);
+    } else {
+        llOwnerSay("Fehler: Ungültiger YouTube-Link.");
+    }
+}
+
+default {
+    state_entry() {
+        gListenHandle = llListen(MENU_CHANNEL, "", NULL_KEY, "");
+        llOwnerSay("System gestartet. Initialisiere Playlist...");
+        
+        if(llGetInventoryType(gNotecardName) == INVENTORY_NOTECARD) {
+            gPlaylist = [];
+            gQueryID = llGetNotecardLine(gNotecardName, gLine = 0);
         }
-    </script>
-</body>
-</html>
+    }
+
+    dataserver(key query_id, string data) {
+        if(query_id == gQueryID) {
+            if(data != EOF) {
+                if(llStringLength(llStringTrim(data, STRING_TRIM)) > 5)
+                    gPlaylist += [data];
+                gQueryID = llGetNotecardLine(gNotecardName, ++gLine);
+            } else {
+                llOwnerSay("Playlist geladen: " + (string)llGetListLength(gPlaylist) + " Songs.");
+            }
+        }
+    }
+
+    touch_start(integer total_number) {
+        llTextBox(llDetectedKey(0), "YouTube-URL hier einfügen:", MENU_CHANNEL);
+    }
+
+    listen(integer channel, string name, key id, string message) {
+        if(channel == MENU_CHANNEL) {
+            playMedia(message);
+        }
+    }
+
+    changed(integer change) {
+        if (change & CHANGED_INVENTORY) llResetScript();
+    }
+}
