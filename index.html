@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SL TV Player 2026</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <div id="player"></div>
+    <div id="video-container"></div>
+
     <script>
-        // 1. Video-ID aus der URL auslesen (?v=ID)
+        // Video-ID aus der URL auslesen (?v=ID)
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
 
         if (vID && vID.length >= 10) {
-            // 2. Den YouTube-Link korrekt zusammenbauen
-            // Wir nutzen 'youtube-nocookie.com' und 'mute=1' für Autoplay-Erlaubnis
-            const embedUrl = "https://www.youtube-nocookie.com" + vID + "?autoplay=1&mute=1&rel=0&enablejsapi=1";
+            // Wir verwenden die Standard-Domain, da nocookie bei dir DNS-Fehler verursacht
+            // autoplay=1 und mute=1 sind zwingend für den Start in 2026
+            const embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=1&rel=0&modestbranding=1";
             
-            document.getElementById('player').innerHTML = 
-                '<iframe src="' + embedUrl + '" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>';
+            document.getElementById('video-container').innerHTML = 
+                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
