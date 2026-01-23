@@ -2,49 +2,44 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>SL TV Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SL YouTube Player 2026</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #player { width: 100%; height: 100%; }
+        #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
     <div id="player"></div>
-
+    <script src="https://www.youtube.com"></script>
     <script>
-        // 1. Die Video-ID aus der URL holen (z.B. ?v=ID)
         const urlParams = new URLSearchParams(window.location.search);
-        const videoId = urlParams.get('v');
+        const vID = urlParams.get('v');
 
-        if (videoId) {
-            // 2. YouTube IFrame API laden
-            var tag = document.createElement('script');
-            tag.src = "https://www.youtube.com";
-            var firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-            var player;
-            function onYouTubeIframeAPIReady() {
+        var player;
+        function onYouTubeIframeAPIReady() {
+            if (vID) {
                 player = new YT.Player('player', {
-                    height: '100%',
-                    width: '100%',
-                    videoId: videoId,
+                    videoId: vID,
                     playerVars: {
                         'autoplay': 1,
+                        'mute': 1,       // WICHTIG für Autoplay in 2026
                         'rel': 0,
-                        'showinfo': 0,
-                        'modestbranding': 1
+                        'modestbranding': 1,
+                        'playsinline': 1
                     },
                     events: {
                         'onReady': onPlayerReady
                     }
                 });
+            } else {
+                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Warte auf Video-ID...</h2>';
             }
-            function onPlayerReady(event) {
-                event.target.playVideo();
-            }
-        } else {
-            document.body.innerHTML = '<h2 style="color:white; text-align:center; padding-top:20%;">Warte auf Video-ID von Second Life...</h2>';
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            // Hinweis: Der User muss in SL auf den Bildschirm klicken, um den Ton zu aktivieren (Unmute)
         }
     </script>
 </body>
