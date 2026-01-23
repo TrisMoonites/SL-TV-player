@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body style="margin:0px;padding:0px;overflow:hidden">
+    <iframe id="player" width="100%" height="100%" 
+        src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const vID = urlParams.get('v');
+        if(vID) {
+            document.getElementById('player').src = "https://www.youtube.com/embed/" + vID + "?autoplay=1";
+        }
+    </script>
+</body>
+</html>
