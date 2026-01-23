@@ -2,27 +2,54 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SL YouTube Player 2026</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #player { width: 100%; height: 100%; border: none; }
+        #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
-    <div id="video-container"></div>
+    <div id="player"></div>
+    
+    <!-- KORREKTER LINK ZUR API -->
+    <script src="https://www.youtube.com"></script>
+    
     <script>
-        // Holt die Video-ID aus der URL (z.B. ?v=0I-fuX6ZeuA)
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
 
-        if (vID) {
-            // Hier wird der korrekte Einbettungs-Link gebaut
-            // youtube-nocookie.com braucht zwingend den Zusatz "/embed/"
-            const embedUrl = "https://www.youtube-nocookie.com" + vID + "?autoplay=1&mute=1&rel=0";
-            
-            document.getElementById('video-container').innerHTML = 
-                '<iframe src="' + embedUrl + '" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>';
-        } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Warte auf Video-ID...</h2>';
+        var player;
+        // Diese Funktion wird automatisch von der YouTube-API aufgerufen
+        function onYouTubeIframeAPIReady() {
+            if (vID && vID.length >= 10) {
+                player = new YT.Player('player', {
+                    videoId: vID,
+                    playerVars: {
+                        'autoplay': 1,
+                        'mute': 1,       // Zwingend für Autoplay 2026
+                        'rel': 0,
+                        'modestbranding': 1,
+                        'playsinline': 1,
+                        'enablejsapi': 1
+                    },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onError': onPlayerError
+                    }
+                });
+            } else {
+                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Warte auf Video-ID von Second Life...</h2>';
+            }
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        function onPlayerError(e) {
+            // Falls das Video nicht eingebettet werden darf (Urheberrecht)
+            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Video blockiert oder nicht verfügbar.</h2>';
         }
     </script>
 </body>
