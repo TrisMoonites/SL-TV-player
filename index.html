@@ -1,45 +1,34 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL YouTube Player 2026</title>
     <style>
+        /* Das macht das Video bildschirmfüllend */
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <div id="player"></div>
-    <script src="https://www.youtube.com"></script>
+    <div id="video-container"></div>
+
     <script>
+        // 1. Hole die Video-ID aus dem Link (?v=...)
         const urlParams = new URLSearchParams(window.location.search);
-        const vID = urlParams.get('v');
+        const videoId = urlParams.get('v');
 
-        var player;
-        function onYouTubeIframeAPIReady() {
-            if (vID) {
-                player = new YT.Player('player', {
-                    videoId: vID,
-                    playerVars: {
-                        'autoplay': 1,
-                        'mute': 1,       // WICHTIG für Autoplay in 2026
-                        'rel': 0,
-                        'modestbranding': 1,
-                        'playsinline': 1
-                    },
-                    events: {
-                        'onReady': onPlayerReady
-                    }
-                });
-            } else {
-                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;">Warte auf Video-ID...</h2>';
-            }
-        }
+        const container = document.getElementById('video-container');
 
-        function onPlayerReady(event) {
-            event.target.playVideo();
-            // Hinweis: Der User muss in SL auf den Bildschirm klicken, um den Ton zu aktivieren (Unmute)
+        if (videoId) {
+            // 2. Erstelle den Player direkt als IFrame
+            // Wir nutzen 'youtube-nocookie.com', das wird seltener blockiert
+            container.innerHTML = `
+                <iframe 
+                    src="https://www.youtube-nocookie.com{videoId}?autoplay=1&mute=1&rel=0" 
+                    allow="autoplay; encrypted-media" 
+                    allowfullscreen>
+                </iframe>`;
+        } else {
+            // Falls keine ID da ist, zeige diesen Text
+            container.innerHTML = '<h2 style="color:white; text-align:center; padding-top:20%;">Warte auf Video...</h2>';
         }
     </script>
 </body>
