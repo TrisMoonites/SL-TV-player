@@ -14,20 +14,42 @@
     <div id="video-container"></div>
 
     <script>
-        // Video-ID aus der URL auslesen (?v=ID)
-        const urlParams = new URLSearchParams(window.location.search);
-        const vID = urlParams.get('v');
+    const urlParams = new URLSearchParams(window.location.search);
+    const vID = urlParams.get('v');
 
-        if (vID && vID.length >= 10) {
-            // Wir verwenden die Standard-Domain, da nocookie bei dir DNS-Fehler verursacht
-            // autoplay=1 und mute=1 sind zwingend für den Start in 2026
-            const embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=1&rel=0&modestbranding=1";
-            
-            document.getElementById('video-container').innerHTML = 
-                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-        } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
+    if (vID && vID.length >= 10) {
+        // Lade die YouTube IFrame API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('video-container', {
+                height: '100%',
+                width: '100%',
+                videoId: vID,
+                playerVars: {
+                    'autoplay': 1,
+                    'mute': 0, // Versuche unmuted zu starten
+                    'rel': 0,
+                    'modestbranding': 1
+                },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
         }
-    </script>
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            event.target.setVolume(100); // Lautstärke explizit auf 100%
+        }
+    } else {
+        document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
+    }
+</script>
+
 </body>
 </html>
