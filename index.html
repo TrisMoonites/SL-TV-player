@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL TV Player 2026</title>
+    <title>SL TV Player 2026 - Loop Edition</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -14,14 +14,14 @@
     <div id="video-container"></div>
 
     <script>
-        // Video-ID aus der URL auslesen (?v=ID)
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
 
         if (vID && vID.length >= 10) {
-            // Wir verwenden die Standard-Domain, da nocookie bei dir DNS-Fehler verursacht
-            // autoplay=1 und mute=1 sind zwingend für den Start in 2026
-            const embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1";
+            // Loop-Logik: 'loop=1' UND 'playlist=ID' sind zwingend für YouTube IFrames
+            const embedUrl = "https://www.youtube.com/embed/" + vID + 
+                             "?autoplay=1&mute=0&rel=0&modestbranding=1" +
+                             "&loop=1&playlist=" + vID;
             
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
