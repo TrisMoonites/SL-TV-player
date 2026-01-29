@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL TV Player 2026 - Loop Edition</title>
+    <title>SL TV Player 2.2 - Piped Edition</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -18,17 +18,16 @@
         const vID = urlParams.get('v');
 
         if (vID && vID.length >= 10) {
-            // PROXY-LOGIK: Wir ersetzen youtube.com durch eine Invidious-Instanz
-            // Dies umgeht das Problem mit dem schwarzen Bild und filtert Werbung.
-            const proxyInstance = "https://yewtu.be"; 
+            // Piped Instanzen sind oft performanter als Invidious
+            const proxyInstance = "https://pipedapi.kavin.rocks"; 
             
-            // Bei Invidious reicht loop=1 für den Endlos-Loop aus
-            const embedUrl = proxyInstance + vID + "?autoplay=1&mute=0&loop=1&quality=dash";
+            // Piped benötigt nur die ID. Loop wird über den Player erzwungen.
+            const embedUrl = proxyInstance + vID;
             
             document.getElementById('video-container').innerHTML = 
-                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+                `<iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
         } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
+            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video...</h2>';
         }
     </script>
 </body>
