@@ -1,33 +1,13 @@
 <!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL TV Player 2.2 - Direct Edition</title>
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    </style>
-</head>
-<body>
-    <div id="player"></div>
-
+<html>
+<body style="margin:0; background:#000;">
+    <iframe width="100%" height="100%" 
+        src="https://www.youtube.com<?php echo $_GET['v']; ?>?autoplay=1&loop=1" 
+        frameborder="0" allow="autoplay">
+    </iframe>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const vID = urlParams.get('v');
-
-        if (vID && vID.length >= 10) {
-            // youtube-nocookie.com ist die offizielle datenschutzfreundliche Domain von Google.
-            // rel=0 & iv_load_policy=3 reduzieren Werbung und Einblendungen drastisch.
-            const embedUrl = "https://www.youtube-nocookie.com" + vID + 
-                             "?autoplay=1&mute=0&rel=0&iv_load_policy=3&modestbranding=1" +
-                             "&loop=1&playlist=" + vID;
-            
-            document.getElementById('player').innerHTML = 
-                `<iframe width="100%" height="100%" src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-        } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
-        }
+        const id = new URLSearchParams(window.location.search).get('v');
+        if(id) document.querySelector('iframe').src = "https://www.youtube.com" + id + "?autoplay=1&loop=1&playlist=" + id;
     </script>
 </body>
 </html>
