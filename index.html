@@ -14,13 +14,12 @@
         const vID = urlParams.get('v');
 
         if (vID) {
-            // Wir nutzen eine Invidious-Instanz (Proxy), um YouTube-Blockaden zu umgehen.
-            // Dies ist werbefrei und funktioniert meist auch dann, wenn YouTube "blank" bleibt.
+            // Dieser Proxy (Invidious) umgeht die YouTube-Sperre im SL-Viewer
             const proxyInstance = "https://inv.tux.digital"; 
             document.getElementById('player').innerHTML = 
                 `<iframe src="${proxyInstance}${vID}?autoplay=1&loop=1&listen=0" allow="autoplay; fullscreen"></iframe>`;
         } else {
-            document.body.innerHTML = "<h2 style='color:white;text-align:center;padding-top:20%;font-family:sans-serif;'>Warte auf Video...</h2>";
+            document.body.innerHTML = "<h2 style='color:white;text-align:center;padding-top:20%;font-family:sans-serif;'>Warte auf Video-ID...</h2>";
         }
     </script>
 </body>
