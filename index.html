@@ -3,31 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL TV Player 2.2 - Piped Edition</title>
+    <title>SL TV Player 2.2 - Direct Edition</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        iframe { width: 100%; height: 100%; border: none; }
+        #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
-    <div id="video-container"></div>
+    <div id="player"></div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
 
         if (vID && vID.length >= 10) {
-            // Piped Instanzen sind oft performanter als Invidious
-            const proxyInstance = "https://pipedapi.kavin.rocks"; 
+            // youtube-nocookie.com ist die offizielle datenschutzfreundliche Domain von Google.
+            // rel=0 & iv_load_policy=3 reduzieren Werbung und Einblendungen drastisch.
+            const embedUrl = "https://www.youtube-nocookie.com" + vID + 
+                             "?autoplay=1&mute=0&rel=0&iv_load_policy=3&modestbranding=1" +
+                             "&loop=1&playlist=" + vID;
             
-            // Piped benötigt nur die ID. Loop wird über den Player erzwungen.
-            const embedUrl = proxyInstance + vID;
-            
-            document.getElementById('video-container').innerHTML = 
-                `<iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+            document.getElementById('player').innerHTML = 
+                `<iframe width="100%" height="100%" src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
         } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video...</h2>';
+            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
     </script>
 </body>
