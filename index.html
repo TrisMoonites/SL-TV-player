@@ -2,34 +2,25 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL TV Player 2.2 - Ad-Free Loop</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <div id="video-container"></div>
-
+    <div id="player"></div>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
 
-        if (vID && vID.length >= 10) {
-            // youtube-nocookie: Verhindert Werbe-Tracking
-            // iv_load_policy=3: Blendet Video-Anmerkungen aus
-            // rel=0: Zeigt nur verwandte Videos vom eigenen Kanal (vermindert Ads)
-            // loop=1 + playlist=ID: Erzwingt den Endlos-Loop
-            const embedUrl = "https://www.youtube-nocookie.com" + vID + 
-                             "?autoplay=1&mute=0&rel=0&modestbranding=1" + 
-                             "&iv_load_policy=3&loop=1&playlist=" + vID;
-            
-            document.getElementById('video-container').innerHTML = 
-                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        if (vID) {
+            // Wir nutzen eine Invidious-Instanz (Proxy), um YouTube-Blockaden zu umgehen.
+            // Dies ist werbefrei und funktioniert meist auch dann, wenn YouTube "blank" bleibt.
+            const proxyInstance = "https://inv.tux.digital"; 
+            document.getElementById('player').innerHTML = 
+                `<iframe src="${proxyInstance}${vID}?autoplay=1&loop=1&listen=0" allow="autoplay; fullscreen"></iframe>`;
         } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video...</h2>';
+            document.body.innerHTML = "<h2 style='color:white;text-align:center;padding-top:20%;font-family:sans-serif;'>Warte auf Video...</h2>";
         }
     </script>
 </body>
