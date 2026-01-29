@@ -2,24 +2,33 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SL TV Player 2026 - Loop Edition</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <div id="player"></div>
+    <div id="video-container"></div>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
 
-        if (vID) {
-            // Dieser Proxy (Invidious) umgeht die YouTube-Sperre im SL-Viewer
+        if (vID && vID.length >= 10) {
+            // PROXY-LOGIK: Wir ersetzen youtube.com durch eine Invidious-Instanz
+            // Dies umgeht das Problem mit dem schwarzen Bild und filtert Werbung.
             const proxyInstance = "https://inv.tux.digital"; 
-            document.getElementById('player').innerHTML = 
-                `<iframe src="${proxyInstance}${vID}?autoplay=1&loop=1&listen=0" allow="autoplay; fullscreen"></iframe>`;
+            
+            // Bei Invidious reicht loop=1 für den Endlos-Loop aus
+            const embedUrl = proxyInstance + vID + "?autoplay=1&mute=0&loop=1&quality=dash";
+            
+            document.getElementById('video-container').innerHTML = 
+                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
         } else {
-            document.body.innerHTML = "<h2 style='color:white;text-align:center;padding-top:20%;font-family:sans-serif;'>Warte auf Video-ID...</h2>";
+            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
     </script>
 </body>
