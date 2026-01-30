@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL TV Player 2026 - Ultimate Edition</title>
+    <title>SL TV Player 2026 - Loop Edition</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -18,40 +18,36 @@
         const vID = urlParams.get('v');
 
         if (vID && vID.length >= 10) {
-            // Liste der Server: Die ersten sind werbefrei, der letzte ist das Original
+            // Liste der Server: 1. Werbefrei (Invidious), 2. Fallback (Original YouTube)
             const instances = [
                 "https://yewtu.be",
-                "https://inv.tux.rs",
-                "https://www.youtube.com"
+                "https://www.youtube.com/embed/"
             ];
             
-            function loadPlayer(index) {
-                if (index >= instances.length) return;
+            let currentTry = 0;
 
+            function loadPlayer(index) {
                 const baseUrl = instances[index];
-                
-                // Wir hängen alle Sicherheits-Parameter an (rel=0, modestbranding, etc.)
-                // Diese funktionieren sowohl beim Original als auch bei den meisten Instanzen
                 const embedUrl = baseUrl + vID + 
                                  "?autoplay=1&mute=0&rel=0&modestbranding=1" +
-                                 "&controls=1&loop=1&playlist=" + vID;
+                                 "&loop=1&playlist=" + vID;
                 
                 const container = document.getElementById('video-container');
                 container.innerHTML = `<iframe id="player-frame" src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
 
-                // Automatischer Fallback-Timer (4 Sekunden)
-                if (index < instances.length - 1) {
+                // Sicherheits-Check: Falls der werbefreie Server nicht reagiert, schalte nach 3s auf YouTube um
+                if (index === 0) {
                     const timeout = setTimeout(() => {
-                        console.log("Wechsle zum nächsten Server...");
-                        loadPlayer(index + 1);
-                    }, 4000);
+                        console.log("Instanz langsam/offline, wechsle zu YouTube...");
+                        loadPlayer(1);
+                    }, 3500);
 
-                    // Sobald das IFrame lädt, wird der Timer gestoppt
+                    // Sobald das IFrame lädt, stoppen wir den Fallback-Timer
                     document.getElementById('player-frame').onload = () => clearTimeout(timeout);
                 }
             }
 
-            loadPlayer(0); 
+            loadPlayer(0); // Starte mit dem werbefreien Server
 
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
