@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL TV Player 2026 - Loop Edition</title>
+    <title>SL TV Player 2026 - Firestorm Fix</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -16,23 +16,22 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vParam = urlParams.get('v');
-        const isPopup = urlParams.get('popup') === '1'; // Prüft auf &popup=1 aus deinem LSL
 
         if (vParam) {
-            // Teilt die IDs auf, falls es eine Playlist ist (kommagetrennt)
             const ids = vParam.split(',');
-            const firstID = ids[0];
+            const firstID = ids[0].trim();
             const playlist = ids.length > 1 ? vParam : firstID;
 
-            // Nutzt youtube-nocookie für weniger Werbung, wenn popup aktiv ist
-            const baseUrl = isPopup ? "https://www.youtube-nocookie.com" : "https://www.youtube.com/embed/";
-
-            const embedUrl = baseUrl + firstID + 
+            // Verwendung von youtube-nocookie UND Sicherheits-Tags gegen schwarzen Bildschirm
+            const embedUrl = "https://www.youtube-nocookie.com" + firstID + 
                              "?autoplay=1&mute=0&rel=0&modestbranding=1" +
                              "&loop=1&playlist=" + playlist;
             
             document.getElementById('video-container').innerHTML = 
-                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                `<iframe src="${embedUrl}" 
+                         allow="autoplay; encrypted-media; picture-in-picture" 
+                         allowfullscreen 
+                         referrerpolicy="no-referrer"></iframe>`;
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
