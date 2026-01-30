@@ -15,13 +15,21 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const vID = urlParams.get('v');
+        const vParam = urlParams.get('v');
+        const isPopup = urlParams.get('popup') === '1'; // Prüft auf &popup=1 aus deinem LSL
 
-        if (vID && vID.length >= 10) {
-            // Loop-Logik: 'loop=1' UND 'playlist=ID' sind zwingend für YouTube IFrames
-            const embedUrl = "https://www.youtube.com/embed/" + vID + 
+        if (vParam) {
+            // Teilt die IDs auf, falls es eine Playlist ist (kommagetrennt)
+            const ids = vParam.split(',');
+            const firstID = ids[0];
+            const playlist = ids.length > 1 ? vParam : firstID;
+
+            // Nutzt youtube-nocookie für weniger Werbung, wenn popup aktiv ist
+            const baseUrl = isPopup ? "https://www.youtube-nocookie.com" : "https://www.youtube.com/embed/";
+
+            const embedUrl = baseUrl + firstID + 
                              "?autoplay=1&mute=0&rel=0&modestbranding=1" +
-                             "&loop=1&playlist=" + vID;
+                             "&loop=1&playlist=" + playlist;
             
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
