@@ -18,37 +18,13 @@
         const vID = urlParams.get('v');
 
         if (vID && vID.length >= 10) {
-            // Liste der Server: 1. Werbefrei (Invidious), 2. Fallback (Original YouTube)
-            const instances = [
-                "https://yewtu.be",
-                "https://www.youtube.com/embed/"
-            ];
+            // Loop-Logik: 'loop=1' UND 'playlist=ID' sind zwingend für YouTube IFrames
+            const embedUrl = "https://www.youtube.com/embed/" + vID + 
+                             "?autoplay=1&mute=0&rel=0&modestbranding=1" +
+                             "&loop=1&playlist=" + vID;
             
-            let currentTry = 0;
-
-            function loadPlayer(index) {
-                const baseUrl = instances[index];
-                const embedUrl = baseUrl + vID + 
-                                 "?autoplay=1&mute=0&rel=0&modestbranding=1" +
-                                 "&loop=1&playlist=" + vID;
-                
-                const container = document.getElementById('video-container');
-                container.innerHTML = `<iframe id="player-frame" src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-
-                // Sicherheits-Check: Falls der werbefreie Server nicht reagiert, schalte nach 3s auf YouTube um
-                if (index === 0) {
-                    const timeout = setTimeout(() => {
-                        console.log("Instanz langsam/offline, wechsle zu YouTube...");
-                        loadPlayer(1);
-                    }, 3500);
-
-                    // Sobald das IFrame lädt, stoppen wir den Fallback-Timer
-                    document.getElementById('player-frame').onload = () => clearTimeout(timeout);
-                }
-            }
-
-            loadPlayer(0); // Starte mit dem werbefreien Server
-
+            document.getElementById('video-container').innerHTML = 
+                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
