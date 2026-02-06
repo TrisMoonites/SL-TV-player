@@ -16,13 +16,28 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
+        const listID = urlParams.get('list');
 
-        if (vID && vID.length >= 10) {
-            // Loop-Logik: 'loop=1' UND 'playlist=ID' sind zwingend für YouTube IFrames
-            const embedUrl = "https://www.youtube.com/embed/" + vID + 
-                             "?autoplay=1&mute=0&rel=0&modestbranding=1" +
-                             "&loop=1&playlist=" + vID;
-            
+        let embedUrl = "";
+
+        if (listID) {
+            // Unterstützung für echte YouTube Playlists (list=)
+            embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
+        } else if (vID) {
+            if (vID.includes(',')) {
+                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
+                const ids = vID.split(',');
+                embedUrl = "https://www.youtube.com/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + vID;
+            } else if (vID.length < 15) {
+                // Standard Einzelvideo-Loop
+                embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
+            } else {
+                // Unterstützung für die Suchfunktion (Punkt 6)
+                embedUrl = "https://www.youtube.com" + vID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
+            }
+        }
+
+        if (embedUrl) {
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
         } else {
