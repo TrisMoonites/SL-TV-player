@@ -23,27 +23,23 @@
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
             embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
-               if (listID) {
-            embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0";
         } else if (vID) {
             if (vID.includes(',')) {
+                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                const first = ids[0];
-                // Wir senden die restlichen IDs an den playlist-Parameter
-                const rest = ids.slice(1).join(','); 
-                embedUrl = "https://www.youtube.com/embed/" + first + "?autoplay=1&mute=0&playlist=" + rest + "&loop=1&rel=0";
-            } else {
-                // Einzelvideo Loop
-                embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&playlist=" + vID + "&loop=1&rel=0";
-            }
-        }
- 
+                // Erstes Video als Start-ID, die gesamte Kette (vID) als Playlist für den Loop
+                embedUrl = "https://www.youtube.com/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
                 embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
             } else {
                 // Unterstützung für die Suchfunktion (Punkt 6)
-                embedUrl = "https://www.youtube.com" + vID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
+                // Sicherstellen, dass /embed/ vorhanden ist, falls vID nur die ID ist
+                if (vID.startsWith("/watch?v=")) {
+                    embedUrl = "https://www.youtube.com/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&rel=0&modestbranding=1";
+                } else {
+                    embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1";
+                }
             }
         }
 
