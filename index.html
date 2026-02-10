@@ -25,14 +25,18 @@
             embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
         } else if (vID) {
             if (vID.includes(',')) {
-                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
+                // Unterstützung für Listen aus deinem LSL-Script (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                embedUrl = "https://www.youtube.com/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + vID;
+                const firstID = ids[0];
+                // Wir schneiden das erste Video aus der Playlist-Warteschlange heraus (slice)
+                // Damit verhindern wir, dass das erste Video doppelt spielt.
+                const restIDs = ids.slice(1).join(',');
+                embedUrl = "https://www.youtube.com/embed/" + firstID + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + restIDs + "&loop=1";
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
                 embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
             } else {
-                // Unterstützung für die Suchfunktion (Punkt 6)
+                // Unterstützung für direkte YouTube-Pfade
                 embedUrl = "https://www.youtube.com" + vID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
             }
         }
