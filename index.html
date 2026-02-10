@@ -27,7 +27,9 @@
             if (vID.includes(',')) {
                 // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                embedUrl = "https://www.youtube.com/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + vID;
+                const first = ids[0];
+                const rest = ids.slice(1).join(','); // Trennung verhindert Verdopplung/Überspringen
+                embedUrl = "https://www.youtube.com/embed/" + first + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + rest + "&loop=1";
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
                 embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
