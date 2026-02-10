@@ -3,29 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Player Fix</title>
+    <title>SL TV Player 2026 - Loop Edition</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
+        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <div id="player"></div>
+    <div id="video-container"></div>
+
     <script>
-        const vID = new URLSearchParams(window.location.search).get('v');
-        if (vID) {
-            const ids = vID.split(',');
-            if (ids.length > 1) {
-                // Video 1 als Start, Video 2 bis Ende als Playlist-Parameter
-                const first = ids[0];
-                const rest = ids.slice(1).join(',');
-                document.getElementById('player').innerHTML = 
-                    `<iframe src="https://www.youtube.com{first}?autoplay=1&playlist=${rest}&loop=1" allow="autoplay"></iframe>`;
+        const urlParams = new URLSearchParams(window.location.search);
+        const vID = urlParams.get('v');
+        const listID = urlParams.get('list');
+
+        let embedUrl = "";
+
+        if (listID) {
+            // Unterstützung für echte YouTube Playlists (list=)
+            embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
+        } else if (vID) {
+            if (vID.includes(',')) {
+                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
+                const ids = vID.split(',');
+                embedUrl = "https://www.youtube.com/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + vID;
+            } else if (vID.length < 15) {
+                // Standard Einzelvideo-Loop
+                embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
             } else {
-                // Nur ein Video im Loop
-                document.getElementById('player').innerHTML = 
-                    `<iframe src="https://www.youtube.com{ids[0]}?autoplay=1&playlist=${ids[0]}&loop=1" allow="autoplay"></iframe>`;
+                // Unterstützung für die Suchfunktion (Punkt 6)
+                embedUrl = "https://www.youtube.com" + vID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
             }
+        }
+
+        if (embedUrl) {
+            document.getElementById('video-container').innerHTML = 
+                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        } else {
+            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
     </script>
 </body>
