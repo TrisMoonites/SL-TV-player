@@ -23,13 +23,21 @@
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
             embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
+               if (listID) {
+            embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0";
         } else if (vID) {
             if (vID.includes(',')) {
-                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
                 const first = ids[0];
-                const rest = ids.slice(1).join(','); // Trennung verhindert Verdopplung/Überspringen
-                embedUrl = "https://www.youtube.com/embed/" + first + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + rest + "&loop=1";
+                // Wir senden die restlichen IDs an den playlist-Parameter
+                const rest = ids.slice(1).join(','); 
+                embedUrl = "https://www.youtube.com/embed/" + first + "?autoplay=1&mute=0&playlist=" + rest + "&loop=1&rel=0";
+            } else {
+                // Einzelvideo Loop
+                embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&playlist=" + vID + "&loop=1&rel=0";
+            }
+        }
+ 
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
                 embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
