@@ -21,20 +21,15 @@
         let embedUrl = "";
 
         if (listID) {
-            // Unterstützung für echte YouTube Playlists (list=)
             embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
         } else if (vID) {
             if (vID.includes(',')) {
-                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
-                const ids = vID.split(',');
-                const firstID = ids[0];
-                // Wir senden die komplette Liste und erzwingen mit index=0 den Start beim ersten Video
-                embedUrl = "https://www.youtube.com/embed/" + firstID + "?autoplay=1&mute=0&rel=0&modestbranding=1&playlist=" + vID + "&index=0&loop=1";
+                // Lösung: Wir nutzen /embed/ ohne ID davor und definieren alles über playlist + index
+                // Das zwingt YouTube, die Liste strikt bei 0 zu beginnen
+                embedUrl = "https://www.youtube.com" + vID + "&index=0&loop=1";
             } else if (vID.length < 15) {
-                // Standard Einzelvideo-Loop
-                embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
+                embedUrl = "https://www.youtube.com" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
             } else {
-                // Unterstützung für die Suchfunktion (Punkt 6)
                 embedUrl = "https://www.youtube.com" + vID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
             }
         }
