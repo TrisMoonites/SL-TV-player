@@ -22,9 +22,12 @@
             embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0";
         } else if (vID) {
             const ids = vID.split(',');
-            const firstVideo = ids[0];
-            // Wir nutzen das erste Video als Host und die gesamte Liste für den Loop
-            embedUrl = "https://www.youtube.com" + firstVideo + "?autoplay=1&mute=0&rel=0&playlist=" + vID + "&loop=1&origin=" + window.location.origin;
+            if (ids.length > 0) {
+                // FEHLERBEHEBUNG: Wir nehmen NUR die erste ID (Index 0) für den Pfad
+                const firstVideo = ids[0]; 
+                // Die komplette Liste (vID) kommt in den playlist-Parameter für den Loop
+                embedUrl = "https://www.youtube.com" + firstVideo + "?autoplay=1&mute=0&rel=0&playlist=" + vID + "&loop=1";
+            }
         }
 
         if (embedUrl) {
