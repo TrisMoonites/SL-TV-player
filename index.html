@@ -23,9 +23,9 @@
         } else if (vID) {
             const ids = vID.split(',');
             if (ids.length > 0) {
-                // FEHLERBEHEBUNG: Wir nehmen NUR die erste ID (Index 0) für den Pfad
+                // KORREKTUR: Wir nehmen NUR die erste ID für den Pfad
                 const firstVideo = ids[0]; 
-                // Die komplette Liste (vID) kommt in den playlist-Parameter für den Loop
+                // Die gesamte Liste (vID) wird als Playlist-Parameter für den Loop angehängt
                 embedUrl = "https://www.youtube.com" + firstVideo + "?autoplay=1&mute=0&rel=0&playlist=" + vID + "&loop=1";
             }
         }
