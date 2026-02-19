@@ -4,11 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SL TV Player 2026 - Loop Edition</title>
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
+   <style>
+    body, html { 
+        margin: 0; padding: 0; height: 100%; width: 100%; 
+        overflow: hidden; background-color: #000; 
+    }
+    #video-container { 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        display: flex; align-items: center; justify-content: center;
+    }
+    iframe { 
+        width: 100%; height: 100%; border: none;
+        /* Vergrößert das Video, um Balken an den Rändern abzuschneiden */
+        transform: scale(1.15); 
+        transform-origin: center center;
+    }
+</style>
 </head>
 <body>
     <div id="video-container"></div>
