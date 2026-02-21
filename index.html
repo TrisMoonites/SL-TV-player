@@ -13,21 +13,22 @@
         position: absolute; 
         top: 0; left: 0; 
         width: 100%; height: 100%; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        overflow: hidden;
     }
     iframe { 
-        /* Wir erzwingen eine feste Größe und verzerren sie dann */
-        width: 100vw !important; 
-        height: 100vh !important; 
+        position: absolute;
+        /* Wir machen den Iframe breiter und höher als nötig */
+        width: 100% !important; 
+        height: 100% !important; 
         border: none;
-        /* Verhindert, dass Browser das Seitenverhältnis erzwingen */
-        object-fit: fill; 
-        
-        /* Optionaler "Brute Force" Stretch, falls YouTube blockiert: */
-        /* Wir skalieren die Höhe leicht hoch (z.B. 1.2 für 20% mehr Höhe) */
-        transform: scaleY(1.25); 
+        top: 50%;
+        left: 50%;
+        /* 
+           scale(1.05, 1.15) streckt das Video:
+           1.05 = 5% breiter (X-Achse)
+           1.15 = 15% höher (Y-Achse)
+        */
+        transform: translate(-50%, -50%) scale(1.05, 1.15);
     }
 </style>
 </head>
