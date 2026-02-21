@@ -10,13 +10,20 @@
         overflow: hidden; background-color: #000; 
     }
     #video-container { 
-        position: absolute; 
-        /* Wir machen den Container 20% höher und 20% breiter als den Bildschirm */
-        top: -10%; left: -10%; width: 120%; height: 120%; 
+        position: relative; 
+        width: 100vw; 
+        height: 100vh; 
+        overflow: hidden; /* Schneidet alles ab, was übersteht */
     }
     iframe { 
-        width: 100% !important; 
-        height: 100% !important; 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100vw;
+        height: 100vh;
+        /* Vergrößert das Video um 15%, um die Balken "aus dem Bild" zu schieben */
+        /* 'translate(-50%, -50%)' hält das Video exakt in der Mitte */
+        transform: translate(-50%, -50%) scale(1.15); 
         border: none;
     }
 </style>
