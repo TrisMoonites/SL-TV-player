@@ -33,90 +33,47 @@
 </style>
 </head>
 <body>
-    <div id="video-container">
-        <h2 id="status-text" style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Suche besten werbefreien Server...</h2>
-    </div>
+    <div id="video-container"></div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        // Eine Liste der aktuell stabilsten, öffentlichen Invidious-Instanzen
-        const instances = [
-            "https://yewtu.be",
-            "https://nerdvpn.de",
-            "https://tux.digital",
-            "https://flokinet.to",
-            "https://melmac.space"
-        ];
+        let embedUrl = "";
+        // Piped-Proxy als Basis-URL für werbefreies Streaming
+        const proxyBase = "https://piped.video";
 
-        // Funktion um die schnellste Instanz zu ermitteln
-        async function getFastestInstance() {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5 Sekunden Limit pro Server
-
-            try {
-                // Erstellt parallele Anfragen an alle Server. Der schnellste gewinnt!
-                const fastest = await Promise.any(
-                    instances.map(async (url) => {
-                        const res = await fetch(`${url}/api/v1/health`, { 
-                            method: 'GET', 
-                            signal: controller.signal,
-                            mode: 'cors'
-                        });
-                        if (res.ok) return url;
-                        throw new Error('Server ungesund');
-                    })
-                );
-                clearTimeout(timeoutId);
-                return fastest;
-            } catch (e) {
-                // Fallback falls alle Pings blockiert werden oder fehlschlagen
-                clearTimeout(timeoutId);
-                return instances[0]; 
-            }
-        }
-
-        async function startPlayer() {
-            if (!vID && !listID) {
-                document.getElementById('video-container').innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
-                return;
-            }
-
-            // Ermittle dynamisch die beste Instanz
-            const proxyBase = await getFastestInstance();
-            let embedUrl = "";
-
-            if (listID) {
-                // Unterstützung für echte YouTube Playlists (list=)
-                embedUrl = proxyBase + listID + "&autoplay=1&mute=0&quality=dash";
-            } else if (vID) {
-                if (vID.includes(',')) {
-                    // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
-                    const ids = vID.split(',');
-                    embedUrl = proxyBase + "/embed/" + ids[0] + "?autoplay=1&mute=0&quality=dash";
-                } else if (vID.length < 15) {
-                    // Standard Einzelvideo-Loop
-                    embedUrl = proxyBase + "/embed/" + vID + "?autoplay=1&mute=0&loop=1&quality=dash";
+        if (listID) {
+            // Unterstützung für echte YouTube Playlists (list=) über das Piped-Format
+            embedUrl = "https://piped.video" + listID.split('list=')[1];
+        } else if (vID) {
+            if (vID.includes(',')) {
+                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
+                const ids = vID.split(',');
+                // Übergibt die IDs an den werbefreien Piped-Player mit Autoplay
+                embedUrl = proxyBase + ids[0] + "?autoplay=1";
+            } else if (vID.length < 15) {
+                // Standard Einzelvideo-Loop über den Piped-Proxy
+                embedUrl = proxyBase + vID + "?autoplay=1&loop=1";
+            } else {
+                // Unterstützung für die Suchfunktion (Punkt 6)
+                if (vID.startsWith("/watch?v=")) {
+                    embedUrl = proxyBase + vID.split('v=')[1] + "?autoplay=1";
                 } else {
-                    // Unterstützung für die Suchfunktion (Punkt 6)
-                    if (vID.startsWith("/watch?v=")) {
-                        embedUrl = proxyBase + "/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&quality=dash";
-                    } else {
-                        embedUrl = proxyBase + "/embed/" + vID + "?autoplay=1&mute=0&quality=dash";
-                    }
+                    embedUrl = proxyBase + vID + "?autoplay=1";
                 }
             }
-
-            if (embedUrl) {
-                document.getElementById('video-container').innerHTML = 
-                    `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-            }
         }
 
-        // Startet die Serverprüfung und lädt anschließend das Video
-        startPlayer();
+        if (embedUrl) {
+            // Erstellt den sauberen Iframe über den Piped-Proxy ohne Werbe-Skripte
+            document.getElementById('video-container').innerHTML = 
+                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        } else {
+            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
+        }
     </script>
 </body>
 </html>
+
