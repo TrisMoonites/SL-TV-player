@@ -44,7 +44,7 @@
 
         let embedUrl = "";
         // Nutzung der werbe- und cookieblockierenden Entwicklerdomain von YouTube
-        const baseDomain = "https://youtube-nocookie.com";
+        const baseDomain = "https://www.youtube-nocookie.com";
         
         // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch, um lokale IP-Werbung auszutricksen
         const globalParams = "&hl=en&gl=US";
@@ -56,14 +56,14 @@
             if (vID.includes(',')) {
                 // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                embedUrl = baseDomain + "/embed/" + ids + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + globalParams;
+                embedUrl = baseDomain + "/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + globalParams;
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
                 embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + globalParams;
             } else {
                 // Unterstützung für die Suchfunktion (Punkt 6)
                 if (vID.startsWith("/watch?v=")) {
-                    embedUrl = baseDomain + "/embed/" + vID.split('v=') + "?autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
+                    embedUrl = baseDomain + "/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
                 } else {
                     embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
                 }
