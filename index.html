@@ -15,8 +15,7 @@
         width: 100%; height: 100%; 
         overflow: hidden;
     }
-    /* Der native Videoplayer wird genauso gestreckt wie Ihr alter Iframe */
-    video { 
+    #yt-player { 
         position: absolute;
         width: 100% !important; 
         height: 100% !important; 
@@ -24,55 +23,105 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) scale(1.05, 1.85);
-        object-fit: cover;
     }
 </style>
 </head>
 <body>
-    <div id="video-container"></div>
+    <!-- SimCaster-Prinzip: Ein leerer Div-Container, der von der Google API kontrolliert wird -->
+    <div id="video-container">
+        <div id="yt-player"></div>
+    </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         let vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        // SimCaster-Prinzip: Wir nutzen eine offizielle API, um den echten Videostream abzugreifen
-        // Cobo ist ein extrem schneller, werbefreier und öffentlicher Video-Stream-Extraktor
-        const streamApiBase = "https://wuk.sh"; 
+        let playlistArray = [];
 
-        // Verarbeite Playlists oder Suchstrings wie in Ihrem Originalskript
-        if (listID) {
-            const match = listID.match(/[?&]v=([^&#]*)/);
-            if (match) vID = match[1];
-        } else if (vID && vID.includes(',')) {
-            vID = vID.split(',')[0]; // Nimmt das erste Video der Notecard-Kette
-        } else if (vID && vID.startsWith("/watch?v=")) {
-            vID = vID.split('v=')[1];
+        // Notecard-Weichen und Listen-Splitting verarbeiten
+        if (vID) {
+            if (vID.includes(',')) {
+                playlistArray = vID.split(',');
+                vID = playlistArray[0]; // Erstes Video als Startpunkt
+            } else if (vID.startsWith("/watch?v=")) {
+                vID = vID.split('v=')[1];
+            }
         }
 
-        if (vID) {
-            // Wir generieren die direkte Video-Stream-URL, die YouTube-Sperren umgeht
-            const youtubeUrl = encodeURIComponent("https://youtube.com" + vID);
-            
-            // Ein nativer HTML5 Player (video-Tag) lädt das Video direkt als rohen Datenstrom. 
-            // Völlig ohne YouTube-Scripte, ohne Tracker, ohne Smiley und zu 100% werbefrei.
-            document.getElementById('video-container').innerHTML = 
-                `<video id="sl-video" autoplay playsinline controls muted="false" src="${streamApiBase}?url=${youtubeUrl}"></video>`;
-            
-            // Aktiviert den automatischen Loop, sobald das Video in SL endet
-            const videoElement = document.getElementById('sl-video');
-            if (videoElement) {
-                videoElement.loop = true;
-                // Falls Second Life das Autoplay blockiert, erzwingt dieser Trigger den Start
-                videoElement.addEventListener('loadedmetadata', () => {
-                    videoElement.play().catch(() => {
-                        videoElement.muted = true; // Fallback: Stumm starten, falls der SL-Viewer den Ton blockiert
-                        videoElement.play();
-                    });
-                });
+        // 1. Lädt die offizielle YouTube IFrame-Player-API im Hintergrund
+        const tag = document.createElement('script');
+        tag.src = "https://youtube.com";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        let player;
+        // 2. Diese Funktion wird automatisch von Google ausgeführt, sobald die API bereit ist
+        window.onYouTubeIframeAPIReady = function() {
+            if (!vID && !listID) return;
+
+            // Player-Konfiguration (SimCaster-Setup für TV-Tarnung)
+            const playerConfig = {
+                height: '100%',
+                width: '100%',
+                playerVars: {
+                    'autoplay': 1,
+                    'mute': 0,
+                    'controls': 1,
+                    'rel': 0,
+                    'modestbranding': 1,
+                    'showinfo': 0,
+                    'iv_load_policy': 3,
+                    'origin': window.location.origin // Legitimiert den Second Life Browser bei Google
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            };
+
+            // Unterscheidung zwischen klassischer Playlist und Einzelvideo/Notecard-Liste
+            if (listID) {
+                playerConfig.playerVars.listType = 'playlist';
+                playerConfig.playerVars.list = listID.includes('list=') ? listID.split('list=')[1] : listID;
+            } else {
+                playerConfig.videoId = vID;
+                if (playlistArray.length > 1) {
+                    playerConfig.playerVars.playlist = playlistArray.join(',');
+                } else {
+                    playerConfig.playerVars.loop = 1;
+                    playerConfig.playerVars.playlist = vID; // Loop benötigt zwingend die ID als eigene Playlist
+                }
             }
-        } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
+
+            // Erstellt den getarnten Player im video-container
+            player = new YT.Player('yt-player', playerConfig);
+        };
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        // 3. Überwacht den Videostatus (Werbeunterbrechungen abfangen)
+        function onPlayerStateChange(event) {
+            // Wenn das Video läuft (Status 1), prüfen wir, ob die YouTube-Werbe-Schnittstelle feuert
+            if (event.data == YT.PlayerState.PLAYING) {
+                const iframe = document.getElementById('yt-player');
+                if (iframe && iframe.contentWindow) {
+                    try {
+                        // Schneller automatischer Skip-Befehl bei Ads
+                        const skipBtn = iframe.contentWindow.document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
+                        if (skipBtn) skipBtn.click();
+                    } catch(e) {
+                        // CORS-Catch: Falls Google blockiert, regelt die API das Video nativ weiter
+                    }
+                }
+            }
+            // Endlos-Loop Absicherung für Notecards
+            if (event.data == YT.PlayerState.ENDED && playlistArray.length <= 1 && !listID) {
+                player.cueVideoById({videoId: vID});
+                player.playVideo();
+            }
         }
     </script>
 </body>
