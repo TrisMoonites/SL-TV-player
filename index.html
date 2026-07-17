@@ -33,73 +33,90 @@
 </style>
 </head>
 <body>
-    <div id="video-container"></div>
+    <div id="video-container">
+        <h2 id="status-text" style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Suche besten werbefreien Server...</h2>
+    </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        let embedUrl = "";
+        // Eine Liste der aktuell stabilsten, öffentlichen Invidious-Instanzen
+        const instances = [
+            "https://yewtu.be",
+            "https://nerdvpn.de",
+            "https://tux.digital",
+            "https://flokinet.to",
+            "https://melmac.space"
+        ];
 
-        if (listID) {
-            // Unterstützung für echte YouTube Playlists (list=)
-            embedUrl = "https://www.youtube.com" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1";
-        } else if (vID) {
-            if (vID.includes(',')) {
-                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
-                const ids = vID.split(',');
-                // Erstes Video als Start-ID, die gesamte Kette (vID) als Playlist für den Loop
-                embedUrl = "https://www.youtube.com/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
-            } else if (vID.length < 15) {
-                // Standard Einzelvideo-Loop
-                embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID;
-            } else {
-                // Unterstützung für die Suchfunktion (Punkt 6)
-                // Sicherstellen, dass /embed/ vorhanden ist, falls vID nur die ID ist
-                if (vID.startsWith("/watch?v=")) {
-                    embedUrl = "https://www.youtube.com/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&rel=0&modestbranding=1";
-                } else {
-                    embedUrl = "https://www.youtube.com/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1";
-                }
+        // Funktion um die schnellste Instanz zu ermitteln
+        async function getFastestInstance() {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5 Sekunden Limit pro Server
+
+            try {
+                // Erstellt parallele Anfragen an alle Server. Der schnellste gewinnt!
+                const fastest = await Promise.any(
+                    instances.map(async (url) => {
+                        const res = await fetch(`${url}/api/v1/health`, { 
+                            method: 'GET', 
+                            signal: controller.signal,
+                            mode: 'cors'
+                        });
+                        if (res.ok) return url;
+                        throw new Error('Server ungesund');
+                    })
+                );
+                clearTimeout(timeoutId);
+                return fastest;
+            } catch (e) {
+                // Fallback falls alle Pings blockiert werden oder fehlschlagen
+                clearTimeout(timeoutId);
+                return instances[0]; 
             }
         }
 
-        if (embedUrl) {
-            // ID Attribut "yt-player" hinzugefügt und Parameter &enablejsapi=1 angehängt für die Werbe-Erkennung
-            const separator = embedUrl.includes('?') ? '&' : '?';
-            document.getElementById('video-container').innerHTML = 
-                `<iframe id="yt-player" src="${embedUrl}${separator}enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-            
-            // Automatische Werbeüberwachung für Second Life (Dullahan/CEF Browser)
-            setInterval(() => {
-                try {
-                    const iframe = document.getElementById('yt-player');
-                    if (iframe && iframe.contentWindow) {
-                        // Simuliert das Klicken des nativen "Überspringen"-Buttons im YouTube-Iframe
-                        const skipBtn = iframe.contentWindow.document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
-                        if (skipBtn) { 
-                            skipBtn.click(); 
-                        }
-                        
-                        // Erkennt, ob eine Werbekomponente aktiv geladen ist
-                        const adContainer = iframe.contentWindow.document.querySelector('.video-ads, .ytp-ad-player-overlay');
-                        const videoTag = iframe.contentWindow.document.querySelector('video');
-                        
-                        if (videoTag && adContainer && adContainer.children.length > 0) {
-                            // Spult die nicht-überspringbare Werbung sofort an das vorderste Ende vor
-                            videoTag.playbackRate = 16.0; 
-                            videoTag.currentTime = videoTag.duration - 0.1;
-                        }
-                    }
-                } catch (e) {
-                    // Verhindert Konsolenfehler, falls die Browser-Sicherheitsrichtlinien (Same-Origin) temporär blockieren
-                }
-            }, 300);
+        async function startPlayer() {
+            if (!vID && !listID) {
+                document.getElementById('video-container').innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
+                return;
+            }
 
-        } else {
-            document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
+            // Ermittle dynamisch die beste Instanz
+            const proxyBase = await getFastestInstance();
+            let embedUrl = "";
+
+            if (listID) {
+                // Unterstützung für echte YouTube Playlists (list=)
+                embedUrl = proxyBase + listID + "&autoplay=1&mute=0&quality=dash";
+            } else if (vID) {
+                if (vID.includes(',')) {
+                    // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
+                    const ids = vID.split(',');
+                    embedUrl = proxyBase + "/embed/" + ids[0] + "?autoplay=1&mute=0&quality=dash";
+                } else if (vID.length < 15) {
+                    // Standard Einzelvideo-Loop
+                    embedUrl = proxyBase + "/embed/" + vID + "?autoplay=1&mute=0&loop=1&quality=dash";
+                } else {
+                    // Unterstützung für die Suchfunktion (Punkt 6)
+                    if (vID.startsWith("/watch?v=")) {
+                        embedUrl = proxyBase + "/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&quality=dash";
+                    } else {
+                        embedUrl = proxyBase + "/embed/" + vID + "?autoplay=1&mute=0&quality=dash";
+                    }
+                }
+            }
+
+            if (embedUrl) {
+                document.getElementById('video-container').innerHTML = 
+                    `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            }
         }
+
+        // Startet die Serverprüfung und lädt anschließend das Video
+        startPlayer();
     </script>
 </body>
 </html>
