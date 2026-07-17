@@ -42,16 +42,24 @@
         const vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        let embedUrl = "";
-        // Nutzung der werbe- und cookieblockierenden Entwicklerdomain von YouTube
-        const baseDomain = "https://www.youtube-nocookie.com";
+        // Rotations-Pool europäischer YouTube-Domains gegen die Umschalt-Sperre
+        const domains = [
+            "https://youtube-nocookie.com",
+            "https://youtube.de",
+            "https://youtube.ch",
+            "https://youtube.at",
+            "https://youtube.co.uk",
+            "https://youtube.es",
+            "https://youtube.fr"
+        ];
         
-        // Generiert bei jedem einzelnen Umschalten eine neue, frische Sitzung für YouTube,
-        // damit Google die Anzahl Ihrer Kanalwechsel nicht mehr mitzählen kann.
-        const cacheBreaker = "&cb=" + Math.random().toString(36).substring(7);
+        // Wählt bei jedem Kanalwechsel eine völlig zufällige Domain aus dem Pool
+        const baseDomain = domains[Math.floor(Math.random() * domains.length)];
         
         // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch, um lokale IP-Werbung auszutricksen
-        const globalParams = "&hl=en&gl=US" + cacheBreaker;
+        const globalParams = "&hl=en&gl=US";
+
+        let embedUrl = "";
 
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
