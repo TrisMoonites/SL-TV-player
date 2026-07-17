@@ -41,33 +41,32 @@
         const listID = urlParams.get('list');
 
         let embedUrl = "";
-        // Piped-Proxy als Basis-URL für werbefreies Streaming
-        const proxyBase = "https://piped.video";
+        
+        // SimCaster-Trick: Nutzung der werbeblocker-freundlichen No-Cookie Domain
+        const baseDomain = "https://youtube-nocookie.com";
 
         if (listID) {
-            // Unterstützung für echte YouTube Playlists (list=) über das Piped-Format
-            embedUrl = "https://piped.video" + listID.split('list=')[1];
+            // Unterstützung für echte YouTube Playlists (list=) über No-Cookie mit Origin-Verifizierung
+            embedUrl = baseDomain + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1&origin=https://github.io";
         } else if (vID) {
             if (vID.includes(',')) {
                 // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                // Übergibt die IDs an den werbefreien Piped-Player mit Autoplay
-                embedUrl = proxyBase + ids[0] + "?autoplay=1";
+                embedUrl = baseDomain + "/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + "&origin=https://github.io";
             } else if (vID.length < 15) {
-                // Standard Einzelvideo-Loop über den Piped-Proxy
-                embedUrl = proxyBase + vID + "?autoplay=1&loop=1";
+                // Standard Einzelvideo-Loop
+                embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + "&origin=https://github.io";
             } else {
                 // Unterstützung für die Suchfunktion (Punkt 6)
                 if (vID.startsWith("/watch?v=")) {
-                    embedUrl = proxyBase + vID.split('v=')[1] + "?autoplay=1";
+                    embedUrl = baseDomain + "/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&rel=0&modestbranding=1&origin=https://github.io";
                 } else {
-                    embedUrl = proxyBase + vID + "?autoplay=1";
+                    embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&origin=https://github.io";
                 }
             }
         }
 
         if (embedUrl) {
-            // Erstellt den sauberen Iframe über den Piped-Proxy ohne Werbe-Skripte
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
         } else {
@@ -76,4 +75,3 @@
     </script>
 </body>
 </html>
-
