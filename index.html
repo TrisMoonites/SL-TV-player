@@ -46,8 +46,8 @@
         // Nutzung der werbe- und cookieblockierenden Entwicklerdomain von YouTube
         const baseDomain = "https://youtube-nocookie.com";
         
-        // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch und aktiviert die JavaScript-API für den Pause-Reset
-        const globalParams = "&hl=en&gl=US&start=0&enablejsapi=1";
+        // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch, um lokale IP-Werbung auszutricksen
+        const globalParams = "&hl=en&gl=US";
 
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
@@ -71,35 +71,13 @@
         }
 
         if (embedUrl) {
-            // Exakt Ihr funktionierendes Iframe-Setup mit "allow-same-origin", damit das Smiley wegbleibt
+            // Exakt Ihr funktionierendes Iframe-Setup mit "allow-same-origin", damit das Smiley sofort wieder verschwindet
             document.getElementById('video-container').innerHTML = 
-                `<iframe id="sl-tv-frame" src="${embedUrl}" 
+                `<iframe src="${embedUrl}" 
                          allow="autoplay; encrypted-media; picture-in-picture" 
                          referrerpolicy="strict-origin-when-cross-origin" 
                          sandbox="allow-scripts opacity allow-same-origin allow-presentation"
                          allowfullscreen></iframe>`;
-
-            // POSTMESSAGE-RESET TRICK: Löscht YouTubes Klick-Zähler im Hintergrund, 
-            // sobald der Viewer die Wiedergabe stoppt oder startet.
-            window.addEventListener('message', function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    // Erkennt die Play- (1) und Pause- (2) Events des Inworld-Zuschauers
-                    if (data.event === 'onStateChange' && (data.info === 1 || data.info === 2)) {
-                        const iframe = document.getElementById('sl-tv-frame');
-                        if (iframe && iframe.contentWindow) {
-                            // Sendet einen unsichtbaren Löschbefehl für die Werbe-Queue an den Player
-                            iframe.contentWindow.postMessage(JSON.stringify({
-                                event: 'command',
-                                func: 'clearVideo',
-                                args: []
-                            }), '*');
-                        }
-                    }
-                } catch(e) {
-                    // CORS-Absicherung für Second Life
-                }
-            });
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
