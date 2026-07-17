@@ -46,8 +46,12 @@
         // Nutzung der werbe- und cookieblockierenden Entwicklerdomain von YouTube
         const baseDomain = "https://www.youtube-nocookie.com";
         
+        // Generiert bei jedem einzelnen Umschalten eine neue, frische Sitzung für YouTube,
+        // damit Google die Anzahl Ihrer Kanalwechsel nicht mehr mitzählen kann.
+        const cacheBreaker = "&cb=" + Math.random().toString(36).substring(7);
+        
         // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch, um lokale IP-Werbung auszutricksen
-        const globalParams = "&hl=en&gl=US";
+        const globalParams = "&hl=en&gl=US" + cacheBreaker;
 
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
