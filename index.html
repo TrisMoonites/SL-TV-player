@@ -66,8 +66,37 @@
         }
 
         if (embedUrl) {
+            // ID Attribut "yt-player" hinzugefügt und Parameter &enablejsapi=1 angehängt für die Werbe-Erkennung
+            const separator = embedUrl.includes('?') ? '&' : '?';
             document.getElementById('video-container').innerHTML = 
-                `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                `<iframe id="yt-player" src="${embedUrl}${separator}enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            
+            // Automatische Werbeüberwachung für Second Life (Dullahan/CEF Browser)
+            setInterval(() => {
+                try {
+                    const iframe = document.getElementById('yt-player');
+                    if (iframe && iframe.contentWindow) {
+                        // Simuliert das Klicken des nativen "Überspringen"-Buttons im YouTube-Iframe
+                        const skipBtn = iframe.contentWindow.document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
+                        if (skipBtn) { 
+                            skipBtn.click(); 
+                        }
+                        
+                        // Erkennt, ob eine Werbekomponente aktiv geladen ist
+                        const adContainer = iframe.contentWindow.document.querySelector('.video-ads, .ytp-ad-player-overlay');
+                        const videoTag = iframe.contentWindow.document.querySelector('video');
+                        
+                        if (videoTag && adContainer && adContainer.children.length > 0) {
+                            // Spult die nicht-überspringbare Werbung sofort an das vorderste Ende vor
+                            videoTag.playbackRate = 16.0; 
+                            videoTag.currentTime = videoTag.duration - 0.1;
+                        }
+                    }
+                } catch (e) {
+                    // Verhindert Konsolenfehler, falls die Browser-Sicherheitsrichtlinien (Same-Origin) temporär blockieren
+                }
+            }, 300);
+
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
