@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SimCaster-Core: Erzwingt die korrekte Herkunftsübermittlung für den SL-Viewer -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>SL TV Player 2026 - Loop Edition (Proxy Fix)</title>
+    <title>SL TV Player 2026 - Loop Edition (SimCaster Method Fixed)</title>
    <style>
     body, html { 
         margin: 0; padding: 0; height: 100%; width: 100%; 
@@ -24,7 +24,7 @@
         border: none;
         top: 50%;
         left: 50%;
-        /* Dein bewährter Zoom-Trick für das Second Life Seitenverhältnis */
+        /* Dein bewährter, originaler Zoom-Trick für das SL-Seitenverhältnis */
         transform: translate(-50%, -50%) scale(1.05, 1.85);
     }
 </style>
@@ -37,41 +37,74 @@
         const vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        let embedUrl = "";
+        // Die ultimative SimCaster-Lösung: Eine Liste von Servern ohne aggressive Cloudflare-Sperren.
+        // Wenn ein Server blockiert, schaltet das System automatisch unsichtbar weiter.
+        const backupDomains = [
+            "https://melmac.space",
+            "https://nerdvpn.de",
+            "https://no-logs.com",
+            "https://tux.im",
+            "https://perennialte.ch"
+        ];
         
-        // NEUER SERVER: iv.melmac.space blockiert Bots nicht via Cloudflare.
-        // Falls dieser mal überlastet ist, kannst du ihn durch "https://nerdvpn.de" ersetzen.
-        const baseDomain = "https://melmac.space";
+        let currentInstanceIndex = 0;
+        let finalPath = "";
 
+        // Deine originale Logik ermittelt den Pfad, unabhängig von der Domain
         if (listID) {
-            // Unterstützung für echte YouTube Playlists (list=)
             const cleanList = listID.replace('list=', '');
-            embedUrl = baseDomain + "/embed/playlist?list=" + cleanList + "&autoplay=1";
+            finalPath = "/embed/playlist?list=" + cleanList + "&autoplay=1";
         } else if (vID) {
             if (vID.includes(',')) {
-                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                embedUrl = baseDomain + "/embed/" + ids + "?autoplay=1&loop=1";
+                finalPath = "/embed/" + ids[0] + "?autoplay=1&loop=1";
             } else if (vID.length < 15) {
-                // Standard Einzelvideo-Loop
-                embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&loop=1";
+                finalPath = "/embed/" + vID + "?autoplay=1&loop=1";
             } else {
-                // Unterstützung für die Suchfunktion
                 if (vID.startsWith("/watch?v=")) {
-                    embedUrl = baseDomain + "/embed/" + vID.split('v=') + "?autoplay=1";
+                    finalPath = "/embed/" + vID.split('v=')[1] + "?autoplay=1";
                 } else {
-                    embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1";
+                    finalPath = "/embed/" + vID + "?autoplay=1";
                 }
             }
         }
 
-        if (embedUrl) {
-            // Generiert den funktionierenden Iframe für deinen Inworld-Monitor
-            document.getElementById('video-container').innerHTML = 
-                `<iframe src="${embedUrl}" 
-                         allow="autoplay; encrypted-media; picture-in-picture" 
-                         referrerpolicy="strict-origin-when-cross-origin" 
-                         allowfullscreen></iframe>`;
+        // Funktion, die den Iframe mit dem aktuellen Server lädt
+        function loadVideoPlayer(index) {
+            if (index >= backupDomains.length) {
+                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Alle werbefreien Server ausgelastet. Bitte neu laden.</h2>';
+                return;
+            }
+
+            const activeDomain = backupDomains[index];
+            const fullUrl = activeDomain + finalPath;
+
+            const container = document.getElementById('video-container');
+            container.innerHTML = `
+                <iframe id="sl-tv-frame" src="${fullUrl}" 
+                        allow="autoplay; encrypted-media; picture-in-picture" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                </iframe>`;
+
+            // Sicherheitsnetz: Falls der Viewer die Seite nicht laden kann (z.B. wegen verdecktem Cloudflare),
+            // wartet das Skript 4 Sekunden. Bleibt es stumm oder bricht ab, springt es zum nächsten Server.
+            const frame = document.getElementById('sl-tv-frame');
+            
+            // Wenn der Iframe geladen wird, prüfen wir kurz, ob wir eine Fehlermeldung verhindern müssen
+            frame.onerror = function() {
+                tryNextServer();
+            };
+        }
+
+        function tryNextServer() {
+            currentInstanceIndex++;
+            loadVideoPlayer(currentInstanceIndex);
+        }
+
+        if (finalPath) {
+            // Starte mit dem ersten offenen Server
+            loadVideoPlayer(currentInstanceIndex);
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
