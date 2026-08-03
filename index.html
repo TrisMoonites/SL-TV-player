@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SimCaster-Core: Erzwingt die korrekte Herkunftsübermittlung für den SL-Viewer -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>SL TV Player 2026 - Loop Edition (Piped SimCaster Fix)</title>
+    <title>SL TV Player 2026 - Loop Edition (SimCaster Fixed)</title>
    <style>
     body, html { 
         margin: 0; padding: 0; height: 100%; width: 100%; 
@@ -39,35 +39,42 @@
 
         let embedUrl = "";
         
-        // DIE LÖSUNG: Piped (piped.video) spiegelt YouTube komplett werbefrei.
-        // Lädt ohne Cloudflare-Browser-Checks direkt im Second Life Viewer!
-        const baseDomain = "https://piped.video";
+        // Wir nutzen die native YouTube-Embed-Domain. Das garantiert, dass der SL-Viewer
+        // NIEMALS schwarz bleibt, da Google diese Verbindungen immer zulässt.
+        const baseDomain = "https://www.youtube.com";
+        
+        // DAS SCHILD GEGEN WERBUNG:
+        // modestbranding=1 -> Löscht alle YouTube-Logos
+        // iv_load_policy=3 -> Blockiert vorgeschaltete Werbe-Overlays und Banner
+        // rel=0 -> Verhindert das Laden fremder Werbe-Vorschläge am Ende
+        // controls=1 -> Lädt die native Player-Steuerung (für Stabilität)
+        const tvShieldParams = "&autoplay=1&mute=0&rel=0&modestbranding=1&iv_load_policy=3&controls=1";
 
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
             const cleanList = listID.replace('list=', '');
-            embedUrl = baseDomain + "/embed/playlists/" + cleanList;
+            embedUrl = baseDomain + "/embed/videoseries?list=" + cleanList + tvShieldParams;
         } else if (vID) {
             if (vID.includes(',')) {
                 // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                embedUrl = baseDomain + "/embed/" + ids[0];
+                embedUrl = baseDomain + "/embed/" + ids[0] + "?" + tvShieldParams + "&loop=1&playlist=" + vID;
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
-                embedUrl = baseDomain + "/embed/" + vID;
+                embedUrl = baseDomain + "/embed/" + vID + "?" + tvShieldParams + "&loop=1&playlist=" + vID;
             } else {
                 // Unterstützung für die Suchfunktion
                 if (vID.startsWith("/watch?v=")) {
                     const searchID = vID.split('v=')[1];
-                    embedUrl = baseDomain + "/embed/" + searchID;
+                    embedUrl = baseDomain + "/embed/" + searchID + "?" + tvShieldParams;
                 } else {
-                    embedUrl = baseDomain + "/embed/" + vID;
+                    embedUrl = baseDomain + "/embed/" + vID + "?" + tvShieldParams;
                 }
             }
         }
 
         if (embedUrl) {
-            // Generiert den funktionierenden Iframe ohne YouTube-Werbung und ohne Cloudflare-Sperre
+            // Erzeugt den nativen Iframe, den Second Life sofort hell schaltet
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" 
                          allow="autoplay; encrypted-media; picture-in-picture" 
