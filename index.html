@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SimCaster-Core: Erzwingt die korrekte Herkunftsübermittlung für den SL-Viewer -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>SL TV Player 2026 - Loop Edition (Plyr Dynamic)</title>
-    
-    <!-- Plyr CSS für die werbefreie Oberfläche -->
-    <link rel="stylesheet" href="https://plyr.io" />
-
+    <title>SL TV Player 2026 - Loop Edition (SimCaster Method)</title>
    <style>
     body, html { 
         margin: 0; padding: 0; height: 100%; width: 100%; 
@@ -21,15 +17,19 @@
         width: 100%; height: 100%; 
         overflow: hidden;
     }
-    /* Zwingt das Plyr-Framework exakt in deinen originalen Zoom-Schnitt */
-    .plyr, .plyr__video-wrapper, .plyr__video-embed { 
+    iframe { 
         position: absolute;
+        /* Wir machen den Iframe breiter und höher als nötig */
         width: 100% !important; 
         height: 100% !important; 
         border: none;
         top: 50%;
         left: 50%;
-        /* Dein bewährter Zoom-Trick gegen Ränder im SL-Viewer */
+        /* 
+           scale(1.05, 1.15) streckt das Video:
+           1.05 = 5% breiter (X-Achse)
+           1.15 = 15% höher (Y-Achse)
+        */
         transform: translate(-50%, -50%) scale(1.05, 1.85);
     }
 </style>
@@ -37,78 +37,46 @@
 <body>
     <div id="video-container"></div>
 
-    <!-- Plyr JavaScript Bibliothek laden -->
-    <script src="https://plyr.io"></script>
-
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        let targetID = "";
+        let embedUrl = "";
+        
+        // DAS GEHEIMNIS: Wir nutzen yewtu.be (Invidious Proxy) statt YouTube.
+        // Keine Werbung, kein Tracking, kein Schwarzbild im Second Life Viewer!
+        const baseDomain = "https://yewtu.be";
 
-        // Deine originale Logik filtert jetzt die sauberen IDs für Plyr heraus
         if (listID) {
-            // Support für Playlists: Wir isolieren die reine ID (löscht eventuelles "list=")
-            targetID = listID.replace('list=', '');
+            // Unterstützung für echte Playlists via Proxy
+            const cleanList = listID.replace('list=', '');
+            embedUrl = baseDomain + "/embed/playlist?list=" + cleanList + "&autoplay=1";
         } else if (vID) {
             if (vID.includes(',')) {
-                // Notecard-Listen: Plyr startet mit der ersten ID aus dem Split
+                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                targetID = ids[0];
+                embedUrl = baseDomain + "/embed/" + ids[0] + "?autoplay=1&loop=1";
             } else if (vID.length < 15) {
-                // Standard Einzelvideo
-                targetID = vID;
+                // Standard Einzelvideo-Loop
+                embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&loop=1";
             } else {
-                // Support für Suchfunktion
+                // Unterstützung für die Suchfunktion
                 if (vID.startsWith("/watch?v=")) {
-                    targetID = vID.split('v=')[1];
+                    embedUrl = baseDomain + "/embed/" + vID.split('v=')[1] + "?autoplay=1";
                 } else {
-                    targetID = vID;
+                    embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1";
                 }
             }
         }
 
-        // Wenn eine ID ermittelt wurde, bauen wir den Player passgenau auf
-        if (targetID) {
-            const container = document.getElementById('video-container');
-            
-            // Plyr verlangt ein frisches Div mit passenden Attributen statt eines Iframes
-            const playerDiv = document.createElement('div');
-            playerDiv.id = 'player';
-            playerDiv.setAttribute('data-plyr-provider', 'youtube');
-            
-            // Wenn es eine Playlist ist, übergeben wir die Playlist-Embed-Struktur an Plyr
-            if (listID) {
-                playerDiv.setAttribute('data-plyr-embed-id', 'https://youtube.com' + targetID);
-            } else {
-                playerDiv.setAttribute('data-plyr-embed-id', targetID);
-            }
-            
-            container.appendChild(playerDiv);
-
-            // Plyr initialisieren und deine Anti-Werbe-Parameter übergeben
-            const player = new Plyr('#player', {
-                autoplay: true,
-                muted: false,
-                loop: { active: true },
-                // Steuert YouTube im Hintergrund an (Verhindert Overlays, zwingt US-Server gegen Ads)
-                youtube: { 
-                    noCookie: true, 
-                    rel: 0, 
-                    showinfo: 0, 
-                    iv_load_policy: 3, 
-                    modestbranding: 1,
-                    hl: 'en',
-                    gl: 'US'
-                }
-            });
-
-            // Erzwingt den Autoplay-Befehl im CEF-Viewer von Second Life, sobald geladen
-            player.on('ready', () => {
-                player.play();
-            });
-
+        if (embedUrl) {
+            // Erzeugt den sauberen, funktionierenden Iframe ohne YouTube-Einschränkungen
+            document.getElementById('video-container').innerHTML = 
+                `<iframe src="${embedUrl}" 
+                         allow="autoplay; encrypted-media; picture-in-picture" 
+                         referrerpolicy="strict-origin-when-cross-origin" 
+                         allowfullscreen></iframe>`;
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
