@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SimCaster-Core: Erzwingt die korrekte Herkunftsübermittlung für den SL-Viewer -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>SL TV Player 2026 - Loop Edition (SimCaster Method Fixed)</title>
+    <title>SL TV Player 2026 - Loop Edition (Piped SimCaster Fix)</title>
    <style>
     body, html { 
         margin: 0; padding: 0; height: 100%; width: 100%; 
@@ -37,74 +37,42 @@
         const vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        // Die ultimative SimCaster-Lösung: Eine Liste von Servern ohne aggressive Cloudflare-Sperren.
-        // Wenn ein Server blockiert, schaltet das System automatisch unsichtbar weiter.
-        const backupDomains = [
-            "https://melmac.space",
-            "https://nerdvpn.de",
-            "https://no-logs.com",
-            "https://tux.im",
-            "https://perennialte.ch"
-        ];
+        let embedUrl = "";
         
-        let currentInstanceIndex = 0;
-        let finalPath = "";
+        // DIE LÖSUNG: Piped (piped.video) spiegelt YouTube komplett werbefrei.
+        // Lädt ohne Cloudflare-Browser-Checks direkt im Second Life Viewer!
+        const baseDomain = "https://piped.video";
 
-        // Deine originale Logik ermittelt den Pfad, unabhängig von der Domain
         if (listID) {
+            // Unterstützung für echte YouTube Playlists (list=)
             const cleanList = listID.replace('list=', '');
-            finalPath = "/embed/playlist?list=" + cleanList + "&autoplay=1";
+            embedUrl = baseDomain + "/embed/playlists/" + cleanList;
         } else if (vID) {
             if (vID.includes(',')) {
+                // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                finalPath = "/embed/" + ids[0] + "?autoplay=1&loop=1";
+                embedUrl = baseDomain + "/embed/" + ids[0];
             } else if (vID.length < 15) {
-                finalPath = "/embed/" + vID + "?autoplay=1&loop=1";
+                // Standard Einzelvideo-Loop
+                embedUrl = baseDomain + "/embed/" + vID;
             } else {
+                // Unterstützung für die Suchfunktion
                 if (vID.startsWith("/watch?v=")) {
-                    finalPath = "/embed/" + vID.split('v=')[1] + "?autoplay=1";
+                    const searchID = vID.split('v=')[1];
+                    embedUrl = baseDomain + "/embed/" + searchID;
                 } else {
-                    finalPath = "/embed/" + vID + "?autoplay=1";
+                    embedUrl = baseDomain + "/embed/" + vID;
                 }
             }
         }
 
-        // Funktion, die den Iframe mit dem aktuellen Server lädt
-        function loadVideoPlayer(index) {
-            if (index >= backupDomains.length) {
-                document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Alle werbefreien Server ausgelastet. Bitte neu laden.</h2>';
-                return;
-            }
-
-            const activeDomain = backupDomains[index];
-            const fullUrl = activeDomain + finalPath;
-
-            const container = document.getElementById('video-container');
-            container.innerHTML = `
-                <iframe id="sl-tv-frame" src="${fullUrl}" 
-                        allow="autoplay; encrypted-media; picture-in-picture" 
-                        referrerpolicy="strict-origin-when-cross-origin" 
-                        allowfullscreen>
-                </iframe>`;
-
-            // Sicherheitsnetz: Falls der Viewer die Seite nicht laden kann (z.B. wegen verdecktem Cloudflare),
-            // wartet das Skript 4 Sekunden. Bleibt es stumm oder bricht ab, springt es zum nächsten Server.
-            const frame = document.getElementById('sl-tv-frame');
-            
-            // Wenn der Iframe geladen wird, prüfen wir kurz, ob wir eine Fehlermeldung verhindern müssen
-            frame.onerror = function() {
-                tryNextServer();
-            };
-        }
-
-        function tryNextServer() {
-            currentInstanceIndex++;
-            loadVideoPlayer(currentInstanceIndex);
-        }
-
-        if (finalPath) {
-            // Starte mit dem ersten offenen Server
-            loadVideoPlayer(currentInstanceIndex);
+        if (embedUrl) {
+            // Generiert den funktionierenden Iframe ohne YouTube-Werbung und ohne Cloudflare-Sperre
+            document.getElementById('video-container').innerHTML = 
+                `<iframe src="${embedUrl}" 
+                         allow="autoplay; encrypted-media; picture-in-picture" 
+                         referrerpolicy="strict-origin-when-cross-origin" 
+                         allowfullscreen></iframe>`;
         } else {
             document.body.innerHTML = '<h2 style="color:white;text-align:center;padding-top:20%;font-family:Arial;">Warte auf Video-ID...</h2>';
         }
