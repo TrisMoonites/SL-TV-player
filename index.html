@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SimCaster-Core: Erzwingt die korrekte Herkunftsübermittlung für den SL-Viewer -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>SL TV Player 2026 - Loop Edition (Plyr Upgrade)</title>
+    <title>SL TV Player 2026 - Plyr Fixed Edition</title>
     
-    <!-- NEU: Plyr CSS Stylesheet für die werbefreie Oberfläche -->
+    <!-- Plyr CSS Stylesheet für die werbefreie Oberfläche -->
     <link rel="stylesheet" href="https://plyr.io" />
 
    <style>
@@ -34,58 +34,66 @@
 </style>
 </head>
 <body>
-    <!-- Geändert: Plyr benötigt ein leeres Div mit einer ID statt des Iframes -->
     <div id="video-container">
         <div id="player"></div>
     </div>
 
-    <!-- NEU: Plyr JavaScript Bibliothek laden -->
+    <!-- Plyr JavaScript Bibliothek laden -->
     <script src="https://plyr.io"></script>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const vID = urlParams.get('v');
+        let vID = urlParams.get('v');
         const listID = urlParams.get('list');
 
-        let embedUrl = "";
-        const baseDomain = "https://www.youtube-nocookie.com";
-        const globalParams = "&hl=en&gl=US";
+        let finalID = "";
+        let isPlaylist = false;
 
-        // Ihre originale URL-Logik bleibt komplett erhalten!
+        // IDs exakt isolieren, damit Plyr sie verarbeiten kann
         if (listID) {
-            embedUrl = baseDomain + "/embed/videoseries?" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
+            // Falls es eine echte Playlist ist, isolieren wir die Listen-ID
+            // Falls das Inworld-Skript "list=PL..." schickt, filtern wir das "list=" heraus
+            finalID = listID.includes('list=') ? listID.split('list=')[1] : listID;
+            isPlaylist = true;
         } else if (vID) {
             if (vID.includes(',')) {
+                // Notecard-Liste: Plyr nimmt das erste Video als Startvideo
                 const ids = vID.split(',');
-                embedUrl = baseDomain + "/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + globalParams;
-            } else if (vID.length < 15) {
-                embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + globalParams;
+                finalID = ids[0];
+            } else if (vID.startsWith("/watch?v=")) {
+                // Suchfunktion-Filter
+                finalID = vID.split('v=')[1];
             } else {
-                if (vID.startsWith("/watch?v=")) {
-                    embedUrl = baseDomain + "/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
-                } else {
-                    embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
-                }
+                // Standard Einzelvideo
+                finalID = vID;
             }
         }
 
-        if (embedUrl) {
+        if (finalID) {
             const playerDiv = document.getElementById('player');
             
-            // Plyr füttern: Wir übergeben Ihre generierte URL direkt an die API
+            // Plyr mit den sauberen IDs füttern
             playerDiv.setAttribute('data-plyr-provider', 'youtube');
-            playerDiv.setAttribute('data-plyr-embed-id', embedUrl);
+            playerDiv.setAttribute('data-plyr-embed-id', finalID);
 
-            // Aktiviert den Player mit Werbe-Unterdrückung
+            // Aktiviert den Player und übergibt die YouTube-Parameter direkt als API-Objekt
             const player = new Plyr('#player', {
                 autoplay: true,
                 muted: false,
                 loop: { active: true },
-                // Verhindert zusätzliche Youtube-Overlays im SL-Viewer
-                youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+                // Hier übergeben wir Ihre originalen Schutz-Parameter direkt an die YouTube-Schnittstelle von Plyr
+                youtube: { 
+                    noCookie: true, 
+                    rel: 0, 
+                    showinfo: 0, 
+                    iv_load_policy: 3, 
+                    modestbranding: 1,
+                    hl: 'en',
+                    gl: 'US'
+                }
             });
 
-            // Erreicht das automatische Abspielen im CEF-Browser von Second Life
+            // Erzwingt den Autoplay-Start im integrierten CEF-Browser von Second Life
             player.on('ready', () => {
                 player.play();
             });
