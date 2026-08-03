@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SimCaster-Core: Erzwingt die korrekte Herkunftsübermittlung für den SL-Viewer -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>SL TV Player 2026 - Loop Edition (SimCaster Method)</title>
+    <title>SL TV Player 2026 - Loop Edition (Proxy Fix)</title>
    <style>
     body, html { 
         margin: 0; padding: 0; height: 100%; width: 100%; 
@@ -19,17 +19,12 @@
     }
     iframe { 
         position: absolute;
-        /* Wir machen den Iframe breiter und höher als nötig */
         width: 100% !important; 
         height: 100% !important; 
         border: none;
         top: 50%;
         left: 50%;
-        /* 
-           scale(1.05, 1.15) streckt das Video:
-           1.05 = 5% breiter (X-Achse)
-           1.15 = 15% höher (Y-Achse)
-        */
+        /* Dein bewährter Zoom-Trick für das Second Life Seitenverhältnis */
         transform: translate(-50%, -50%) scale(1.05, 1.85);
     }
 </style>
@@ -44,26 +39,26 @@
 
         let embedUrl = "";
         
-        // DAS GEHEIMNIS: Wir nutzen yewtu.be (Invidious Proxy) statt YouTube.
-        // Keine Werbung, kein Tracking, kein Schwarzbild im Second Life Viewer!
-        const baseDomain = "https://yewtu.be";
+        // NEUER SERVER: iv.melmac.space blockiert Bots nicht via Cloudflare.
+        // Falls dieser mal überlastet ist, kannst du ihn durch "https://nerdvpn.de" ersetzen.
+        const baseDomain = "https://melmac.space";
 
         if (listID) {
-            // Unterstützung für echte Playlists via Proxy
+            // Unterstützung für echte YouTube Playlists (list=)
             const cleanList = listID.replace('list=', '');
             embedUrl = baseDomain + "/embed/playlist?list=" + cleanList + "&autoplay=1";
         } else if (vID) {
             if (vID.includes(',')) {
                 // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                embedUrl = baseDomain + "/embed/" + ids[0] + "?autoplay=1&loop=1";
+                embedUrl = baseDomain + "/embed/" + ids + "?autoplay=1&loop=1";
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
                 embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&loop=1";
             } else {
                 // Unterstützung für die Suchfunktion
                 if (vID.startsWith("/watch?v=")) {
-                    embedUrl = baseDomain + "/embed/" + vID.split('v=')[1] + "?autoplay=1";
+                    embedUrl = baseDomain + "/embed/" + vID.split('v=') + "?autoplay=1";
                 } else {
                     embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1";
                 }
@@ -71,7 +66,7 @@
         }
 
         if (embedUrl) {
-            // Erzeugt den sauberen, funktionierenden Iframe ohne YouTube-Einschränkungen
+            // Generiert den funktionierenden Iframe für deinen Inworld-Monitor
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" 
                          allow="autoplay; encrypted-media; picture-in-picture" 
