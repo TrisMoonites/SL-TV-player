@@ -43,10 +43,10 @@
         const listID = urlParams.get('list');
 
         let embedUrl = "";
-        // Ihre private Cloudflare-Proxy-Adresse mit albanischer IP-Tarnung gegen Werbung
-        const baseDomain = "https://workers.dev";
+        // Nutzung der werbe- und cookieblockierenden Entwicklerdomain von YouTube
+        const baseDomain = "https://sl-tv-proxy.olli-klein-k.workers.dev";
         
-        // Werbe-Schutz: Erzwingt englisches Player-Menü in der werbefreien Region Albanien
+        // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch, um lokale IP-Werbung auszutricksen
         const globalParams = "&hl=en&gl=AL";
 
         if (listID) {
