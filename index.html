@@ -44,12 +44,10 @@
 
         let embedUrl = "";
         // Nutzung der werbe- und cookieblockierenden Entwicklerdomain von YouTube
-        const baseDomain = "https://www.youtube-nocookie.com";
+        const baseDomain = "https://sl-tv-proxy.olli-klein-k.workers.dev";
         
-        // Werbe-Schutz mit automatischer Umschaltung: Wählt bei jedem Laden zufällig eine Region ohne YouTube-Werbung
-        const countries = ["AL", "AD", "BS"];
-        const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-        const globalParams = "&hl=en&gl=" + randomCountry;
+        // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch, um lokale IP-Werbung auszutricksen
+        const globalParams = "&hl=en&gl=AL";
 
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
