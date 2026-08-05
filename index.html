@@ -16,7 +16,6 @@
             width: 100%; height: 100%; 
             overflow: hidden;
         }
-        /* Ihre bewährte Kinostreckung, angepasst an den API-Player */
         #ytplayer { 
             position: absolute;
             width: 100% !important; 
@@ -34,30 +33,23 @@
     </div>
 
     <script>
-        // 1. Logik aus Ihrem Original-Skript: URL-Parameter auslesen
         const urlParams = new URLSearchParams(window.location.search);
         let vID = urlParams.get('v');
         const listID = urlParams.get('list');
-        
-        // Liest die exakte Startsekunde aus, die das LSL-Skript mitsendet
         const startTime = parseInt(urlParams.get('t')) || 0;
 
-        let targetVideoId = "koZceFeTJRU"; // Standard-Video falls leer
+        let targetVideoId = "koZceFeTJRU"; 
         let playlistId = "";
 
-        // 2. Logik aus Ihrem Original-Skript: IDs, Listen und Suchfunktion verarbeiten
         if (vID) {
             if (vID.includes(',')) {
-                // Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                targetVideoId = ids[0];
-                playlistId = vID; // Übergibt die Kette als Playlist für den Loop
+                targetVideoId = ids[0]; // FIX: Holt die erste Text-ID aus dem Splitting heraus
+                playlistId = vID; 
             } else if (vID.length < 15) {
-                // Standard Einzelvideo
                 targetVideoId = vID;
                 playlistId = vID;
             } else {
-                // Suchfunktion
                 if (vID.startsWith("/watch?v=")) {
                     targetVideoId = vID.split('v=')[1];
                 } else {
@@ -66,13 +58,12 @@
             }
         }
 
-        // 3. SimCaster-Methode: YouTube API Script dynamisch nachladen (JETZT FEHLERFREI KORRIGIERT!)
+        // SimCaster-Methode: API Script dynamisch an den korrekten Platz im DOM einfügen
         var tag = document.createElement("script");
         tag.src = "https://youtube.com";
         var firstScriptTag = document.getElementsByTagName("script")[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // 4. SimCaster-Methode: Player mit Unterdrückung von Overlays und Werbung initialisieren
         var player;
         function onYouTubePlayerAPIReady() {
             let playerConfig = {
@@ -83,21 +74,19 @@
                     autoplay: 1,
                     mute: 0,
                     rel: 0,
-                    iv_load_policy: 3, // Schaltet Video-Anmerkungen und Overlays ab
+                    iv_load_policy: 3, 
                     fs: 1,
                     modestbranding: 1,
-                    start: startTime // Zwingt den Player, exakt bei der übergebenen Sekunde zu starten
+                    start: startTime 
                 }
             };
 
-            // Wenn eine Notecard-Liste existiert, hängen wir sie als Playlist an den Player an
             if (playlistId) {
                 playerConfig.playerVars.playlist = playlistId;
                 playerConfig.playerVars.loop = 1;
             }
-            // Wenn eine echte YouTube-Playlist (list=) übergeben wurde
             if (listID) {
-                delete playerConfig.videoId; // videoId löschen, da list Vorrang hat
+                delete playerConfig.videoId; 
                 playerConfig.playerVars.listType = 'playlist';
                 playerConfig.playerVars.list = listID;
             }
@@ -105,7 +94,6 @@
             player = new YT.Player("ytplayer", playerConfig);
         }
 
-        // Link-Fixer von SimCaster (verhindert das Ausbrechen aus dem Viewer)
         var a = document.getElementsByTagName("a");
         for (i=0; i<a.length; i++) { if (a[i].target="_blank") a[i].target="_self" }
     </script>
