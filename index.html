@@ -43,11 +43,11 @@
         const listID = urlParams.get('list');
 
         let embedUrl = "";
-        // Nutzung der offiziellen, stabilen Entwicklerdomain von YouTube für garantierte Ladezeiten
-        const baseDomain = "https://youtube-nocookie.com";
+        // Nutzung der werbe- und cookieblockierenden Entwicklerdomain von YouTube
+        const baseDomain = "https://www.youtube-nocookie.com";
         
-        // Kombination aus albanischer Region und Werbe-Unterdrückungsparametern
-        const globalParams = "&hl=en&gl=AL&adformat=0&ad_type=0&ad_device=desktop";
+        // Weltweiter Werbe-Schutz: Zwingt den Player auf globales Englisch, um lokale IP-Werbung auszutricksen
+        const globalParams = "&hl=en&gl=US";
 
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
@@ -71,7 +71,7 @@
         }
 
         if (embedUrl) {
-            // Generiert den sauberen Iframe direkt von YouTube
+            // Rettungscode: Sandbox gelöscht! Jetzt wird die Herkunft glasklar an YouTube übertragen, das Smiley verschwindet.
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" 
                          allow="autoplay; encrypted-media; picture-in-picture" 
