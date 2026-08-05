@@ -43,10 +43,8 @@
         const listID = urlParams.get('list');
 
         let embedUrl = "";
-        
-        // Stabilisierte, werbefreie Open-Source-Spiegelinstanz (Invidious)
-        // Lädt das Video werbefrei und bricht den unendlichen Ladekreis von YouTube auf
-        const baseDomain = "https://asir.dev";
+        // Verbindung zu Ihrer privaten Cloudflare-Schnittstelle
+        const baseDomain = "https://workers.dev";
         
         // Player-Parameter für automatische Wiedergabe und Stummschaltungsausgleich
         const globalParams = "&autoplay=1&muted=0&quality=dash&listen=0";
@@ -73,7 +71,7 @@
         }
 
         if (embedUrl) {
-            // Rettungscode: Sandbox gelöscht! Jetzt wird die Herkunft glasklar übertragen, das Smiley verschwindet.
+            // Rettungscode: Sandbox gelöscht! Jetzt wird die Herkunft glasklar an YouTube übertragen, das Smiley verschwindet.
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" 
                          allow="autoplay; encrypted-media; picture-in-picture" 
