@@ -83,6 +83,9 @@
                     iv_load_policy: 3, // Schaltet Video-Anmerkungen und Overlays ab
                     fs: 1,
                     modestbranding: 1
+                },
+                events: {
+                    'onReady': onPlayerReady
                 }
             };
 
@@ -99,6 +102,23 @@
             }
 
             player = new YT.Player("ytplayer", playerConfig);
+        }
+
+        // NEU: Zeitsteuerung für echte Synchronität aller Clubgäste
+        function onPlayerReady(event) {
+            // Sobald das Video bereit ist, ermitteln wir die Gesamtlänge des Videos
+            const videoDuration = player.getDuration();
+            
+            if (videoDuration > 0) {
+                // Holt die aktuelle Computer-Zeit in Sekunden
+                const currentUnixTime = Math.floor(Date.now() / 1000);
+                
+                // Berechnet über den Restwert (Modulo %), an welcher Sekunde das Video gerade sein MUSS
+                const targetStartSecond = currentUnixTime % videoDuration;
+                
+                // Zwingt den Player des Zuschauers exakt an diese berechnete Sekunde zu springen
+                player.seekTo(targetStartSecond, true);
+            }
         }
 
         // Link-Fixer von SimCaster (verhindert das Ausbrechen aus dem Viewer)
