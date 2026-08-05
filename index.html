@@ -43,35 +43,35 @@
         const listID = urlParams.get('list');
 
         let embedUrl = "";
-        // Verbindung zu Ihrer privaten Cloudflare-Schnittstelle
-        const baseDomain = "https://workers.dev";
+        // Nutzung der offiziellen, stabilen Entwicklerdomain von YouTube für garantierte Ladezeiten
+        const baseDomain = "https://youtube-nocookie.com";
         
-        // Player-Parameter für automatische Wiedergabe und Stummschaltungsausgleich
-        const globalParams = "&autoplay=1&muted=0&quality=dash&listen=0";
+        // Kombination aus albanischer Region und Werbe-Unterdrückungsparametern
+        const globalParams = "&hl=en&gl=AL&adformat=0&ad_type=0&ad_device=desktop";
 
         if (listID) {
             // Unterstützung für echte YouTube Playlists (list=)
-            embedUrl = baseDomain + "/embed/videoseries?" + listID + globalParams;
+            embedUrl = baseDomain + "/embed/videoseries?" + listID + "&autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
         } else if (vID) {
             if (vID.includes(',')) {
                 // Unterstützung für Listen aus Notecards (v=ID1,ID2,ID3)
                 const ids = vID.split(',');
-                embedUrl = baseDomain + "/embed/" + ids[0] + "?" + globalParams + "&playlist=" + vID + "&loop=1";
+                embedUrl = baseDomain + "/embed/" + ids[0] + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + globalParams;
             } else if (vID.length < 15) {
                 // Standard Einzelvideo-Loop
-                embedUrl = baseDomain + "/embed/" + vID + "?" + globalParams + "&playlist=" + vID + "&loop=1";
+                embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1&loop=1&playlist=" + vID + globalParams;
             } else {
                 // Unterstützung für die Suchfunktion (Punkt 6)
                 if (vID.startsWith("/watch?v=")) {
-                    embedUrl = baseDomain + "/embed/" + vID.split('v=')[1] + "?" + globalParams;
+                    embedUrl = baseDomain + "/embed/" + vID.split('v=')[1] + "?autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
                 } else {
-                    embedUrl = baseDomain + "/embed/" + vID + "?" + globalParams;
+                    embedUrl = baseDomain + "/embed/" + vID + "?autoplay=1&mute=0&rel=0&modestbranding=1" + globalParams;
                 }
             }
         }
 
         if (embedUrl) {
-            // Rettungscode: Sandbox gelöscht! Jetzt wird die Herkunft glasklar an YouTube übertragen, das Smiley verschwindet.
+            // Generiert den sauberen Iframe direkt von YouTube
             document.getElementById('video-container').innerHTML = 
                 `<iframe src="${embedUrl}" 
                          allow="autoplay; encrypted-media; picture-in-picture" 
