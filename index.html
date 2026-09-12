@@ -66,16 +66,16 @@
             }
         }
 
-        // 3. YouTube No-Cookie Embed (Verhindert Bot-Sperren im SL-Viewer)
-        const NOCOOKIE_BASE = "https://www.youtube-nocookie.com/embed/";
+        // 3. Invidious-Instanz ohne Cloudflare/Captcha-Sperre für SL
+        const INVIDIOUS_BASE = "https://invidious.no-booster.eu/embed/";
         let embedUrl = "";
 
         if (listID) {
-            embedUrl = NOCOOKIE_BASE + targetVideoId + "?list=" + listID + "&autoplay=1&start=" + startTime + "&rel=0&iv_load_policy=3&modestbranding=1";
+            embedUrl = INVIDIOUS_BASE + targetVideoId + "?list=" + listID + "&autoplay=1&t=" + startTime;
         } else if (playlistId && playlistId.includes(',')) {
-            embedUrl = NOCOOKIE_BASE + targetVideoId + "?playlist=" + playlistId + "&autoplay=1&loop=1&start=" + startTime + "&rel=0&iv_load_policy=3&modestbranding=1";
+            embedUrl = INVIDIOUS_BASE + targetVideoId + "?playlist=" + playlistId + "&autoplay=1&loop=1&t=" + startTime;
         } else {
-            embedUrl = NOCOOKIE_BASE + targetVideoId + "?autoplay=1&start=" + startTime + "&rel=0&iv_load_policy=3&modestbranding=1";
+            embedUrl = INVIDIOUS_BASE + targetVideoId + "?autoplay=1&listen=false&t=" + startTime;
         }
 
         // 4. In das bestehende Iframe laden
