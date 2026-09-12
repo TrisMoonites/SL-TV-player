@@ -66,16 +66,19 @@
             }
         }
 
-        // 3. Invidious-Instanz ohne Cloudflare/Captcha-Sperre für SL
-        const INVIDIOUS_BASE = "https://invidious.no-booster.eu/embed/";
+        // 3. Native Engine mit Parameter-Bypass gegen Werbung
+        const BASE_URL = "https://www.youtube-nocookie.com/embed/";
         let embedUrl = "";
 
+        // Parameter unterdrücken Werbe-Elemente, verwandte Videos & Branding
+        const cleanParams = "&autoplay=1&mute=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1&origin=" + window.location.origin;
+
         if (listID) {
-            embedUrl = INVIDIOUS_BASE + targetVideoId + "?list=" + listID + "&autoplay=1&t=" + startTime;
+            embedUrl = BASE_URL + targetVideoId + "?list=" + listID + "&start=" + startTime + cleanParams;
         } else if (playlistId && playlistId.includes(',')) {
-            embedUrl = INVIDIOUS_BASE + targetVideoId + "?playlist=" + playlistId + "&autoplay=1&loop=1&t=" + startTime;
+            embedUrl = BASE_URL + targetVideoId + "?playlist=" + playlistId + "&loop=1&start=" + startTime + cleanParams;
         } else {
-            embedUrl = INVIDIOUS_BASE + targetVideoId + "?autoplay=1&listen=false&t=" + startTime;
+            embedUrl = BASE_URL + targetVideoId + "?start=" + startTime + cleanParams;
         }
 
         // 4. In das bestehende Iframe laden
