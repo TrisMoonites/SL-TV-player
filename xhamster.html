@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>SL TV Player - XHamster Edition</title>
+    <style>
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            width: 100%; 
+            overflow: hidden; 
+            background-color: #000; 
+        }
+        #video-container { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden;
+        }
+        #xhplayer { 
+            position: absolute;
+            width: 100% !important; 
+            height: 100% !important; 
+            border: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <iframe id="xhplayer" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        // 1. URL-Parameter auslesen
+        const urlParams = new URLSearchParams(window.location.search);
+        let videoParam = urlParams.get('v') || urlParams.get('id');
+        let playerFrame = document.getElementById('xhplayer');
+
+        if (videoParam) {
+            videoParam = videoParam.trim();
+            
+            // Falls eine komplette Embed-URL übergeben wurde (z.B. https://xhamster.com/embed/xh...)
+            if (videoParam.startsWith("http://") || videoParam.startsWith("https://")) {
+                playerFrame.src = videoParam;
+            } 
+            // Falls nur die ID übergeben wurde (z.B. xh123456 oder 123456)
+            else {
+                playerFrame.src = "https://xhamster.com/embed/" + videoParam;
+            }
+        }
+
+        // Link-Fixer (verhindert Ausbrechen aus dem Second Life Viewer Browser)
+        var a = document.getElementsByTagName("a");
+        for (var i = 0; i < a.length; i++) { 
+            if (a[i].target === "_blank") a[i].target = "_self"; 
+        }
+    </script>
+</body>
+</html>
