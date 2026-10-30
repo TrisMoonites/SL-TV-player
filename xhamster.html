@@ -35,7 +35,7 @@
 </head>
 <body>
     <div id="video-container">
-        <iframe id="xhplayer" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <iframe id="xhplayer" src="" allow="autoplay *; encrypted-media *; fullscreen *" allowfullscreen></iframe>
     </div>
 
     <script>
@@ -46,15 +46,25 @@
 
         if (videoParam) {
             videoParam = videoParam.trim();
+            let targetSrc = "";
             
             // Falls eine komplette Embed-URL übergeben wurde (z.B. https://xhamster.com/embed/xh...)
             if (videoParam.startsWith("http://") || videoParam.startsWith("https://")) {
-                playerFrame.src = videoParam;
+                targetSrc = videoParam;
             } 
             // Falls nur die ID übergeben wurde (z.B. xh123456 oder 123456)
             else {
-                playerFrame.src = "https://xhamster.com/embed/" + videoParam;
+                targetSrc = "https://xhamster.com/embed/" + videoParam;
             }
+
+            // Autoplay-Parameter anhängen
+            if (targetSrc.includes("?")) {
+                targetSrc += "&autoplay=1";
+            } else {
+                targetSrc += "?autoplay=1";
+            }
+
+            playerFrame.src = targetSrc;
         }
 
         // Link-Fixer (verhindert Ausbrechen aus dem Second Life Viewer Browser)
