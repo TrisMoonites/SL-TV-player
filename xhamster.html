@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>SL TV Player - XHamster Edition</title>
+    <title>SL TV Player - RedTube & YouPorn Edition</title>
     <style>
         body, html { 
             margin: 0; 
@@ -22,7 +22,7 @@
             height: 100%; 
             overflow: hidden;
         }
-        #xhplayer { 
+        #tvplayer { 
             position: absolute;
             width: 100% !important; 
             height: 100% !important; 
@@ -35,45 +35,46 @@
 </head>
 <body>
     <div id="video-container">
-        <iframe id="xhplayer" src="" allow="autoplay *; encrypted-media *; fullscreen *" allowfullscreen></iframe>
+        <iframe id="tvplayer" src="" allow="autoplay *; encrypted-media *; fullscreen *" allowfullscreen></iframe>
     </div>
 
     <script>
-        // 1. URL-Parameter auslesen
         const urlParams = new URLSearchParams(window.location.search);
         let videoParam = urlParams.get('v') || urlParams.get('id');
-        let playerFrame = document.getElementById('xhplayer');
+        let playerFrame = document.getElementById('tvplayer');
 
         if (videoParam) {
             videoParam = videoParam.trim();
             let targetSrc = "";
-            
-            // Falls ein kompletter xhamster.com/videos/ Link eingegeben wurde, ID herausfiltern
-            if (videoParam.includes("xhamster.com/videos/")) {
-                let parts = videoParam.split('?')[0].split('#')[0].split('-');
-                let videoId = parts[parts.length - 1];
-                targetSrc = "https://xhamster.com/embed/" + videoId;
-            }
-            // Falls eine komplette Embed-URL übergeben wurde (z.B. https://xhamster.com/embed/xh...)
+
+            // RedTube Erkennung
+            if (videoParam.includes("redtube.com")) {
+                let match = videoParam.match(/redtube\.com\/(\d+)/);
+                let id = match ? match[1] : videoParam.replace(/\D/g, '');
+                targetSrc = "https://embed.redtube.com/?id=" + id + "&autoplay=1";
+            } 
+            // YouPorn Erkennung
+            else if (videoParam.includes("youporn.com")) {
+                let match = videoParam.match(/watch\/(\d+)/);
+                let id = match ? match[1] : videoParam.replace(/\D/g, '');
+                targetSrc = "https://www.youporn.com/embed/" + id + "/?autoplay=1";
+            } 
+            // Falls bereits eine Embed-URL direkt übergeben wurde
             else if (videoParam.startsWith("http://") || videoParam.startsWith("https://")) {
                 targetSrc = videoParam;
+                if (!targetSrc.includes("autoplay=")) {
+                    targetSrc += (targetSrc.includes("?") ? "&" : "?") + "autoplay=1";
+                }
             } 
-            // Falls nur die ID übergeben wurde (z.B. xh123456 oder 123456)
+            // Fallback (reine Zahlen-ID): Nutzen wir standardmäßig RedTube
             else {
-                targetSrc = "https://xhamster.com/embed/" + videoParam;
-            }
-
-            // Autoplay-Parameter anhängen
-            if (targetSrc.includes("?")) {
-                targetSrc += "&autoplay=1";
-            } else {
-                targetSrc += "?autoplay=1";
+                targetSrc = "https://embed.redtube.com/?id=" + videoParam + "&autoplay=1";
             }
 
             playerFrame.src = targetSrc;
         }
 
-        // Link-Fixer (verhindert Ausbrechen aus dem Second Life Viewer Browser)
+        // Verhindert Ausbrechen aus dem Second Life Viewer Browser
         var a = document.getElementsByTagName("a");
         for (var i = 0; i < a.length; i++) { 
             if (a[i].target === "_blank") a[i].target = "_self"; 
