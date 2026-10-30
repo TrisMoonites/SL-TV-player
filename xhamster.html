@@ -48,8 +48,14 @@
             videoParam = videoParam.trim();
             let targetSrc = "";
             
+            // Falls ein kompletter xhamster.com/videos/ Link eingegeben wurde, ID herausfiltern
+            if (videoParam.includes("xhamster.com/videos/")) {
+                let parts = videoParam.split('?')[0].split('#')[0].split('-');
+                let videoId = parts[parts.length - 1];
+                targetSrc = "https://xhamster.com/embed/" + videoId;
+            }
             // Falls eine komplette Embed-URL übergeben wurde (z.B. https://xhamster.com/embed/xh...)
-            if (videoParam.startsWith("http://") || videoParam.startsWith("https://")) {
+            else if (videoParam.startsWith("http://") || videoParam.startsWith("https://")) {
                 targetSrc = videoParam;
             } 
             // Falls nur die ID übergeben wurde (z.B. xh123456 oder 123456)
