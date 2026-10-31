@@ -49,26 +49,26 @@
 
             // RedTube Erkennung
             if (videoParam.includes("redtube.com")) {
-                let match = videoParam.match(/redtube\.com\/(\d+)/);
+                let match = videoParam.match(/redtube\.com\/(\d+)/) || videoParam.match(/(\d+)/);
                 let id = match ? match[1] : videoParam.replace(/\D/g, '');
-                targetSrc = "https://embed.redtube.com/?id=" + id + "&autoplay=1";
+                targetSrc = "https://embed.redtube.com/?id=" + id + "&autoplay=true&autostart=true&muted=true";
             } 
             // YouPorn Erkennung
             else if (videoParam.includes("youporn.com")) {
-                let match = videoParam.match(/watch\/(\d+)/);
+                let match = videoParam.match(/watch\/(\d+)/) || videoParam.match(/(\d+)/);
                 let id = match ? match[1] : videoParam.replace(/\D/g, '');
-                targetSrc = "https://www.youporn.com/embed/" + id + "/?autoplay=1";
+                targetSrc = "https://www.youporn.com/embed/" + id + "/?autoplay=true&autostart=true&muted=true";
             } 
-            // Falls bereits eine Embed-URL direkt übergeben wurde
+            // Falls bereits eine direkte Embed-URL übergeben wurde
             else if (videoParam.startsWith("http://") || videoParam.startsWith("https://")) {
                 targetSrc = videoParam;
-                if (!targetSrc.includes("autoplay=")) {
-                    targetSrc += (targetSrc.includes("?") ? "&" : "?") + "autoplay=1";
-                }
+                let separator = targetSrc.includes("?") ? "&" : "?";
+                targetSrc += separator + "autoplay=true&autostart=true&muted=true";
             } 
-            // Fallback (reine Zahlen-ID): Nutzen wir standardmäßig RedTube
+            // Fallback (reine Zahlen-ID -> RedTube)
             else {
-                targetSrc = "https://embed.redtube.com/?id=" + videoParam + "&autoplay=1";
+                let cleanId = videoParam.replace(/\D/g, '');
+                targetSrc = "https://embed.redtube.com/?id=" + cleanId + "&autoplay=true&autostart=true&muted=true";
             }
 
             playerFrame.src = targetSrc;
