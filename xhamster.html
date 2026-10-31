@@ -3,130 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>SL TV Player - Universal Edition</title>
+    <meta name="referrer" content="no-referrer">
+    <title>SL TV Player</title>
     <style>
         body, html { 
             margin: 0; padding: 0; height: 100%; width: 100%; 
             overflow: hidden; background-color: #000; 
         }
         #video-container { 
-            position: absolute; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            overflow: hidden;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         }
-        /* Universal Player Styling (für YouTube API und Alternativ-Iframes) */
-        #ytplayer, #altplayer { 
-            position: absolute;
-            width: 100% !important; 
-            height: 100% !important; 
-            border: none;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.02);
+        #tvplayer { 
+            position: absolute; width: 100% !important; height: 100% !important; 
+            border: none; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) scale(1.02); 
         }
     </style>
 </head>
 <body>
     <div id="video-container">
-        <!-- YouTube nutzt das div für die API, Alternativen bekommen dynamisch einen iframe -->
-        <div id="player-slot"></div>
+        <iframe id="tvplayer" src="" allow="autoplay *; encrypted-media *; fullscreen *;" allowfullscreen></iframe>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        let vID = urlParams.get('v') || urlParams.get('id');
-        const listID = urlParams.get('list');
-        const startTime = parseInt(urlParams.get('t')) || 0;
+        let rawParam = urlParams.get('v') || urlParams.get('id');
+        let playerFrame = document.getElementById('tvplayer');
 
-        let slot = document.getElementById('player-slot');
-        let isAlternative = false;
-        let targetEmbedUrl = "";
+        if (rawParam) {
+            let videoParam = decodeURIComponent(rawParam).trim();
+            let targetSrc = "";
 
-        if (vID) {
-            vID = vID.trim();
-
-            // Prüfen, ob es sich um RedTube oder YouPorn handelt
-            if (vID.includes("redtube.com") || vID.includes("rt.com")) {
-                isAlternative = true;
-                let match = vID.match(/redtube\.com\/(\d+)/) || vID.match(/(\d+)/);
-                let id = match ? match[1] : vID.replace(/\D/g, '');
-                targetEmbedUrl = "https://embed.redtube.com/?id=" + id + "&autoplay=1&muted=0";
+            // RedTube
+            if (videoParam.includes("redtube.com") || videoParam.includes("rt.com")) {
+                let match = videoParam.match(/(\d+)/);
+                let id = match ? match[1] : videoParam;
+                targetSrc = "https://embed.redtube.com/?id=" + id + "&autoplay=true&muted=true&autostart=true";
             } 
-            else if (vID.includes("youporn.com") || vID.includes("yp.com")) {
-                isAlternative = true;
-                let match = vID.match(/watch\/(\d+)/) || vID.match(/(\d+)/);
-                let id = match ? match[1] : vID.replace(/\D/g, '');
-                targetEmbedUrl = "https://www.youporn.com/embed/" + id + "/?autoplay=1";
+            // YouPorn
+            else if (videoParam.includes("youporn.com") || videoParam.includes("yp.com")) {
+                let match = videoParam.match(/watch\/(\d+)/) || videoParam.match(/(\d+)/);
+                let id = match ? match[1] : videoParam;
+                targetSrc = "https://www.youporn.com/embed/" + id + "/?autoplay=true&muted=true&autostart=true";
+            } 
+            // Direkt-ID oder unkodierter Link Fallback
+            else {
+                let cleanId = videoParam.replace(/\D/g, '');
+                targetSrc = "https://embed.redtube.com/?id=" + cleanId + "&autoplay=true&muted=true&autostart=true";
             }
+
+            // IFrame laden
+            playerFrame.src = targetSrc;
         }
 
-        // Wenn es YouPorn oder RedTube ist -> iFrame injizieren
-        if (isAlternative) {
-            slot.innerHTML = '<iframe id="altplayer" src="' + targetEmbedUrl + '" allow="autoplay *; encrypted-media *; fullscreen *" allowfullscreen></iframe>';
-        } 
-        // Ansonsten -> Originaler YouTube API Player Ablauf
-        else {
-            slot.innerHTML = '<div id="ytplayer"></div>';
-
-            let targetVideoId = "koZceFeTJRU"; 
-            let playlistId = "";
-
-            if (vID) {
-                if (vID.includes(',')) {
-                    const ids = vID.split(',');
-                    targetVideoId = ids[0];
-                    playlistId = vID; 
-                } else if (vID.length < 15) {
-                    targetVideoId = vID;
-                    playlistId = vID;
-                } else {
-                    if (vID.startsWith("/watch?v=")) {
-                        targetVideoId = vID.split('v=')[1];
-                    } else {
-                        targetVideoId = vID;
-                    }
-                }
-            }
-
-            var tag = document.createElement("script");
-            tag.src = "https://www.youtube.com/player_api";
-            var firstScriptTag = document.getElementsByTagName("script")[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-            var player;
-            window.onYouTubePlayerAPIReady = function() {
-                let playerConfig = {
-                    height: "100%",
-                    width: "100%",
-                    videoId: targetVideoId,
-                    playerVars: {
-                        autoplay: 1,
-                        mute: 0,
-                        rel: 0,
-                        iv_load_policy: 3,
-                        fs: 1,
-                        modestbranding: 1,
-                        start: startTime
-                    }
-                };
-
-                if (playlistId) {
-                    playerConfig.playerVars.playlist = playlistId;
-                    playerConfig.playerVars.loop = 1;
-                }
-                if (listID) {
-                    delete playerConfig.videoId;
-                    playerConfig.playerVars.listType = 'playlist';
-                    playerConfig.playerVars.list = listID;
-                }
-
-                player = new YT.Player("ytplayer", playerConfig);
-            }
-        }
-
-        // Link-Fixer
+        // verhindert Ausbrechen des Links
         var a = document.getElementsByTagName("a");
         for (let i = 0; i < a.length; i++) { 
             if (a[i].target === "_blank") a[i].target = "_self"; 
