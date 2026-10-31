@@ -35,7 +35,7 @@
 </head>
 <body>
     <div id="video-container">
-        <iframe id="tvplayer" src="" allow="autoplay *; encrypted-media *; fullscreen *" allowfullscreen></iframe>
+        <iframe id="tvplayer" src="" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>
     </div>
 
     <script>
@@ -51,30 +51,33 @@
             if (videoParam.includes("redtube.com")) {
                 let match = videoParam.match(/redtube\.com\/(\d+)/) || videoParam.match(/(\d+)/);
                 let id = match ? match[1] : videoParam.replace(/\D/g, '');
-                targetSrc = "https://embed.redtube.com/?id=" + id + "&autoplay=true&autostart=true&muted=true";
+                // Zusätzliche Parameter für erzwungenes Starten
+                targetSrc = "https://embed.redtube.com/?id=" + id + "&autoplay=1&autostart=true&muted=0";
             } 
             // YouPorn Erkennung
             else if (videoParam.includes("youporn.com")) {
                 let match = videoParam.match(/watch\/(\d+)/) || videoParam.match(/(\d+)/);
                 let id = match ? match[1] : videoParam.replace(/\D/g, '');
-                targetSrc = "https://www.youporn.com/embed/" + id + "/?autoplay=true&autostart=true&muted=true";
+                // YouPorn Embed-Struktur mit Autoplay
+                targetSrc = "https://www.youporn.com/embed/" + id + "/?autoplay=1";
             } 
-            // Falls bereits eine direkte Embed-URL übergeben wurde
+            // Falls direkt eine Embed-URL übergeben wurde
             else if (videoParam.startsWith("http://") || videoParam.startsWith("https://")) {
                 targetSrc = videoParam;
-                let separator = targetSrc.includes("?") ? "&" : "?";
-                targetSrc += separator + "autoplay=true&autostart=true&muted=true";
+                if (!targetSrc.includes("autoplay=")) {
+                    targetSrc += (targetSrc.includes("?") ? "&" : "?") + "autoplay=1";
+                }
             } 
             // Fallback (reine Zahlen-ID -> RedTube)
             else {
                 let cleanId = videoParam.replace(/\D/g, '');
-                targetSrc = "https://embed.redtube.com/?id=" + cleanId + "&autoplay=true&autostart=true&muted=true";
+                targetSrc = "https://embed.redtube.com/?id=" + cleanId + "&autoplay=1&autostart=true";
             }
 
             playerFrame.src = targetSrc;
         }
 
-        // Verhindert Ausbrechen aus dem Second Life Viewer Browser
+        // Verhindert das Ausbrechen von Links in externe Browser
         var a = document.getElementsByTagName("a");
         for (var i = 0; i < a.length; i++) { 
             if (a[i].target === "_blank") a[i].target = "_self"; 
